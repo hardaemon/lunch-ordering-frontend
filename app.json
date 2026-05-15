@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "lunch_ordering",
-    "slug": "lunch-ordering",
+    "slug": "mobile",
     "scheme": "lunchordering",
     "version": "1.0.0",
     "orientation": "portrait",
