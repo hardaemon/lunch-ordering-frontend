@@ -21,3 +21,12 @@ EXPO_PUBLIC_API_URL=http://ВАШ_IP_АДРЕС:3000/api
 ## Запуск
 
 В папке frontend выполните команду `npx expo start`
+
+## Сборка .apk
+
+```
+npm install -g eas-cli
+eas login
+eas build:configure
+
+```

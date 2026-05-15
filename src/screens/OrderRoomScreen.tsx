@@ -1,16 +1,20 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import {
   Alert,
   FlatList,
+  Keyboard,
   Modal,
+  Pressable,
   RefreshControl,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
-import Animated, { FadeIn, FadeOut, Layout } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 import * as Clipboard from 'expo-clipboard';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useOrderRoom } from '../hooks/useOrderRoom';
@@ -42,7 +46,7 @@ type Props = NativeStackScreenProps<AppStackParamList, 'OrderRoom'>;
 export function OrderRoomScreen({ route }: Props) {
   const { orderId } = route.params;
   const { user } = useAuth();
-  const { order, isLoading, error, isConnected, reload } = useOrderRoom(orderId);
+  const { order, isLoading, error, reload } = useOrderRoom(orderId);
 
   const [addModalVisible, setAddModalVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -168,6 +172,8 @@ export function OrderRoomScreen({ route }: Props) {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
         }
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
         ListHeaderComponent={
           <View>
             <View style={styles.header}>
@@ -175,17 +181,6 @@ export function OrderRoomScreen({ route }: Props) {
                 <Text style={styles.statusBadge}>
                   {ORDER_STATUS_LABELS[order.status]}
                 </Text>
-                <View style={styles.connectionDot}>
-                  <View
-                    style={[
-                      styles.dot,
-                      { backgroundColor: isConnected ? '#34C759' : '#FF3B30' },
-                    ]}
-                  />
-                  <Text style={styles.connectionText}>
-                    {isConnected ? 'онлайн' : 'офлайн'}
-                  </Text>
-                </View>
               </View>
               <Text style={styles.title}>{order.restaurantName}</Text>
               <Text style={styles.subtitle}>{order.deliveryAddress}</Text>
@@ -207,7 +202,13 @@ export function OrderRoomScreen({ route }: Props) {
                 onPress={handleCopyLink}
                 activeOpacity={0.7}
               >
-                <Text style={styles.actionBtnText}>Скопировать ссылку</Text>
+                <Text
+                  style={styles.actionBtnText}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                >
+                  Поделиться
+                </Text>
               </TouchableOpacity>
               {isOwner && NEXT_STATUS[order.status] && (
                 <TouchableOpacity
@@ -215,7 +216,11 @@ export function OrderRoomScreen({ route }: Props) {
                   onPress={handleAdvanceStatus}
                   activeOpacity={0.7}
                 >
-                  <Text style={[styles.actionBtnText, styles.primaryBtnText]}>
+                  <Text
+                    style={[styles.actionBtnText, styles.primaryBtnText]}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                  >
                     {ORDER_STATUS_LABELS[NEXT_STATUS[order.status]!]}
                   </Text>
                 </TouchableOpacity>
@@ -324,7 +329,7 @@ function ItemRow({
     <Animated.View
       entering={FadeIn.duration(250)}
       exiting={FadeOut.duration(200)}
-      layout={Layout.springify()}
+      layout={LinearTransition.springify()}
       style={styles.itemCard}
     >
       <View style={styles.itemRow}>
@@ -477,12 +482,17 @@ function AddItemModal({
       transparent
       onRequestClose={onClose}
     >
-      <View style={styles.modalOverlay}>
-        <View style={styles.modal}>
+      <KeyboardAvoidingView
+        style={styles.modalOverlay}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <Pressable style={styles.modalBackdrop} onPress={onClose} />
+        <Pressable style={styles.modal} onPress={Keyboard.dismiss}>
           <Text style={styles.modalTitle}>Добавить позицию</Text>
           <TextInput
             style={styles.input}
             placeholder="Название"
+            placeholderTextColor="#999"
             value={name}
             onChangeText={setName}
             editable={!busy}
@@ -490,6 +500,7 @@ function AddItemModal({
           <TextInput
             style={styles.input}
             placeholder="Цена за единицу"
+            placeholderTextColor="#999"
             keyboardType="decimal-pad"
             value={price}
             onChangeText={setPrice}
@@ -498,6 +509,7 @@ function AddItemModal({
           <TextInput
             style={styles.input}
             placeholder="Количество"
+            placeholderTextColor="#999"
             keyboardType="number-pad"
             value={quantity}
             onChangeText={setQuantity}
@@ -518,8 +530,8 @@ function AddItemModal({
               <PrimaryButton title="Добавить" onPress={submit} busy={busy} />
             </View>
           </View>
-        </View>
-      </View>
+        </Pressable>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
@@ -545,10 +557,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     overflow: 'hidden',
   },
-  connectionDot: { flexDirection: 'row', alignItems: 'center' },
-  dot: { width: 8, height: 8, borderRadius: 4, marginRight: 6 },
-  connectionText: { fontSize: 12, color: '#666' },
-  title: { fontSize: 22, fontWeight: '700', marginBottom: 4 },
+  title: { fontSize: 22, fontWeight: '700', marginBottom: 4, color: '#000' },
   subtitle: { color: '#666', marginBottom: 4 },
   meta: { fontSize: 13, color: '#999', marginTop: 2 },
   actionsRow: { flexDirection: 'row', gap: 8, marginBottom: 12 },
@@ -563,16 +572,16 @@ const styles = StyleSheet.create({
   primaryBtn: { backgroundColor: '#007AFF' },
   primaryBtnText: { color: '#fff' },
   summary: { backgroundColor: '#fff', padding: 16, borderRadius: 12, marginBottom: 12 },
-  summaryRow: { fontSize: 15, marginBottom: 4 },
-  summaryGrand: { fontSize: 18, fontWeight: '700', marginTop: 8 },
+  summaryRow: { fontSize: 15, marginBottom: 4, color: '#000' },
+  summaryGrand: { fontSize: 18, fontWeight: '700', marginTop: 8, color: '#000' },
   summaryMeta: { fontSize: 13, color: '#999', marginTop: 8 },
   paidBadge: { backgroundColor: '#E8F5E9', padding: 12, borderRadius: 8, marginBottom: 12 },
   paidText: { color: '#2E7D32', textAlign: 'center' },
-  sectionTitle: { fontSize: 17, fontWeight: '600', marginTop: 8, marginBottom: 8 },
+  sectionTitle: { fontSize: 17, fontWeight: '600', marginTop: 8, marginBottom: 8, color: '#000' },
   emptyText: { textAlign: 'center', color: '#999', padding: 24 },
   itemCard: { backgroundColor: '#fff', padding: 14, borderRadius: 10, marginBottom: 8 },
   itemRow: { flexDirection: 'row', alignItems: 'center' },
-  itemName: { fontSize: 16, fontWeight: '500' },
+  itemName: { fontSize: 16, fontWeight: '500', color: '#000' },
   itemOrdered: { textDecorationLine: 'line-through', color: '#999' },
   itemMeta: { color: '#666', marginTop: 2 },
   itemAuthor: { fontSize: 12, color: '#999', marginTop: 2 },
@@ -599,7 +608,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
   },
-  participantName: { fontSize: 15, fontWeight: '500' },
+  participantName: { fontSize: 15, fontWeight: '500', color: '#000' },
   participantSub: { color: '#666', fontSize: 13, marginTop: 2 },
   confirmBtn: {
     backgroundColor: '#007AFF',
@@ -628,13 +637,14 @@ const styles = StyleSheet.create({
   },
   fabText: { color: '#fff', fontSize: 32, lineHeight: 36, marginTop: -2 },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
+  modalBackdrop: { ...StyleSheet.absoluteFillObject },
   modal: {
     backgroundColor: '#fff',
     padding: 20,
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
   },
-  modalTitle: { fontSize: 20, fontWeight: '700', marginBottom: 16 },
+  modalTitle: { fontSize: 20, fontWeight: '700', marginBottom: 16, color: '#000' },
   input: {
     borderWidth: 1,
     borderColor: '#ddd',
@@ -642,6 +652,8 @@ const styles = StyleSheet.create({
     padding: 14,
     fontSize: 16,
     marginBottom: 12,
+    color: '#000',
+    backgroundColor: '#fff',
   },
   modalActions: { flexDirection: 'row', gap: 8, marginTop: 8 },
   modalBtn: { flex: 1, padding: 14, borderRadius: 8, alignItems: 'center' },

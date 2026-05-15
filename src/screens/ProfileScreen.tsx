@@ -19,7 +19,6 @@ type Props = NativeStackScreenProps<AppStackParamList, 'Profile'>;
 export function ProfileScreen({ navigation }: Props) {
   const { user, setUserLocal, logout } = useAuth();
   const [name, setName] = useState(user?.name ?? '');
-  const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl ?? '');
   const [busy, setBusy] = useState(false);
 
   const save = async () => {
@@ -29,10 +28,7 @@ export function ProfileScreen({ navigation }: Props) {
     }
     setBusy(true);
     try {
-      const updated = await profileApi.updateMe({
-        name: name.trim(),
-        avatarUrl: avatarUrl.trim() || null,
-      });
+      const updated = await profileApi.updateMe({ name: name.trim() });
       setUserLocal(updated);
       toast.success('Профиль обновлён');
     } catch (e: any) {
@@ -43,7 +39,12 @@ export function ProfileScreen({ navigation }: Props) {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.content}
+      keyboardShouldPersistTaps="handled"
+      keyboardDismissMode="on-drag"
+    >
       <View style={styles.card}>
         <Text style={styles.label}>Email</Text>
         <Text style={styles.email}>{user?.email}</Text>
@@ -51,20 +52,9 @@ export function ProfileScreen({ navigation }: Props) {
         <Text style={[styles.label, { marginTop: 16 }]}>Имя</Text>
         <TextInput
           style={styles.input}
+          placeholderTextColor="#999"
           value={name}
           onChangeText={setName}
-          editable={!busy}
-        />
-
-        <Text style={[styles.label, { marginTop: 16 }]}>URL аватара</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="https://..."
-          autoCapitalize="none"
-          autoCorrect={false}
-          keyboardType="url"
-          value={avatarUrl}
-          onChangeText={setAvatarUrl}
           editable={!busy}
         />
 
@@ -112,13 +102,15 @@ const styles = StyleSheet.create({
   content: { padding: 16 },
   card: { backgroundColor: '#fff', padding: 16, borderRadius: 12, marginBottom: 16 },
   label: { fontSize: 13, color: '#666', marginBottom: 6 },
-  email: { fontSize: 16 },
+  email: { fontSize: 16, color: '#000' },
   input: {
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
+    color: '#000',
+    backgroundColor: '#fff',
   },
   row: {
     flexDirection: 'row',
@@ -129,7 +121,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginBottom: 8,
   },
-  rowText: { fontSize: 16 },
+  rowText: { fontSize: 16, color: '#000' },
   rowArrow: { fontSize: 24, color: '#999' },
   logoutRow: { marginTop: 24, justifyContent: 'center' },
   logoutText: { color: '#FF3B30', fontSize: 16, fontWeight: '600' },

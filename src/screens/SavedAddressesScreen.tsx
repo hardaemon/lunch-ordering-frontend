@@ -2,7 +2,11 @@ import React, { useState } from 'react';
 import {
   Alert,
   FlatList,
+  Keyboard,
+  KeyboardAvoidingView,
   Modal,
+  Platform,
+  Pressable,
   StyleSheet,
   Text,
   TextInput,
@@ -150,14 +154,19 @@ function EditAddressModal({
 
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-      <View style={styles.modalOverlay}>
-        <View style={styles.modal}>
+      <KeyboardAvoidingView
+        style={styles.modalOverlay}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <Pressable style={styles.modalBackdrop} onPress={onClose} />
+        <Pressable style={styles.modal} onPress={Keyboard.dismiss}>
           <Text style={styles.modalTitle}>
             {initial ? 'Изменить адрес' : 'Новый адрес'}
           </Text>
           <TextInput
             style={styles.input}
             placeholder="Название (Дом, Офис)"
+            placeholderTextColor="#999"
             value={label}
             onChangeText={setLabel}
             editable={!busy}
@@ -165,6 +174,7 @@ function EditAddressModal({
           <TextInput
             style={styles.input}
             placeholder="ул. Ленина, 1"
+            placeholderTextColor="#999"
             value={address}
             onChangeText={setAddress}
             editable={!busy}
@@ -175,14 +185,14 @@ function EditAddressModal({
               onPress={onClose}
               disabled={busy}
             >
-              <Text>Отмена</Text>
+              <Text style={{ color: '#000' }}>Отмена</Text>
             </TouchableOpacity>
             <View style={{ flex: 1 }}>
               <PrimaryButton title="Сохранить" onPress={submit} busy={busy} />
             </View>
           </View>
-        </View>
-      </View>
+        </Pressable>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
@@ -191,7 +201,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f5f5f7' },
   list: { padding: 16, paddingBottom: 100, flexGrow: 1 },
   row: { backgroundColor: '#fff', padding: 14, borderRadius: 10, marginBottom: 8 },
-  label: { fontSize: 16, fontWeight: '600' },
+  label: { fontSize: 16, fontWeight: '600', color: '#000' },
   value: { fontSize: 14, color: '#666', marginTop: 4 },
   fab: {
     position: 'absolute',
@@ -211,13 +221,14 @@ const styles = StyleSheet.create({
   },
   fabText: { color: '#fff', fontSize: 32, lineHeight: 36, marginTop: -2 },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
+  modalBackdrop: { ...StyleSheet.absoluteFillObject },
   modal: {
     backgroundColor: '#fff',
     padding: 20,
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
   },
-  modalTitle: { fontSize: 20, fontWeight: '700', marginBottom: 16 },
+  modalTitle: { fontSize: 20, fontWeight: '700', marginBottom: 16, color: '#000' },
   input: {
     borderWidth: 1,
     borderColor: '#ddd',
@@ -225,6 +236,8 @@ const styles = StyleSheet.create({
     padding: 12,
     fontSize: 16,
     marginBottom: 12,
+    color: '#000',
+    backgroundColor: '#fff',
   },
   modalActions: { flexDirection: 'row', gap: 8 },
   modalBtn: { flex: 1, padding: 14, borderRadius: 8, alignItems: 'center' },

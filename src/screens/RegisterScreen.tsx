@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import {
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
 } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useAuth } from '../auth/AuthContext';
@@ -51,12 +52,13 @@ export function RegisterScreen({ navigation }: Props) {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <View style={styles.inner}>
+      <Pressable style={styles.inner} onPress={Keyboard.dismiss}>
         <Text style={styles.title}>Регистрация</Text>
 
         <TextInput
           style={styles.input}
           placeholder="Имя"
+          placeholderTextColor="#999"
           value={name}
           onChangeText={setName}
           editable={!busy}
@@ -64,6 +66,7 @@ export function RegisterScreen({ navigation }: Props) {
         <TextInput
           style={styles.input}
           placeholder="Email"
+          placeholderTextColor="#999"
           autoCapitalize="none"
           autoCorrect={false}
           keyboardType="email-address"
@@ -74,7 +77,10 @@ export function RegisterScreen({ navigation }: Props) {
         <TextInput
           style={styles.input}
           placeholder="Пароль (мин. 8 символов)"
+          placeholderTextColor="#999"
           secureTextEntry
+          autoCapitalize="none"
+          autoCorrect={false}
           value={password}
           onChangeText={setPassword}
           editable={!busy}
@@ -90,7 +96,7 @@ export function RegisterScreen({ navigation }: Props) {
         <TouchableOpacity onPress={() => navigation.navigate('Login')}>
           <Text style={styles.link}>Уже есть аккаунт? Войти</Text>
         </TouchableOpacity>
-      </View>
+      </Pressable>
     </KeyboardAvoidingView>
   );
 }
@@ -98,7 +104,7 @@ export function RegisterScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
   inner: { flex: 1, padding: 24, justifyContent: 'center' },
-  title: { fontSize: 28, fontWeight: '700', marginBottom: 24 },
+  title: { fontSize: 28, fontWeight: '700', marginBottom: 24, color: '#000' },
   input: {
     borderWidth: 1,
     borderColor: '#ddd',
@@ -106,6 +112,8 @@ const styles = StyleSheet.create({
     padding: 14,
     marginBottom: 12,
     fontSize: 16,
+    color: '#000',
+    backgroundColor: '#fff',
   },
   link: { textAlign: 'center', marginTop: 16, color: '#007AFF' },
 });

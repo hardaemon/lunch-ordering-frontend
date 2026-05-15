@@ -5,7 +5,6 @@ export type PublicUser = {
   id: string;
   email: string;
   name: string;
-  avatarUrl: string | null;
   notificationPreferences?: NotificationPreferences;
 };
 
@@ -14,7 +13,7 @@ export const profileApi = {
     const { data } = await api.get<PublicUser>('/users/me');
     return data;
   },
-  updateMe: async (payload: { name?: string; avatarUrl?: string | null }) => {
+  updateMe: async (payload: { name?: string }) => {
     const { data } = await api.patch<PublicUser>('/users/me', payload);
     return data;
   },

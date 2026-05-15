@@ -89,7 +89,11 @@ export function CreateOrderScreen({ navigation }: Props) {
   };
 
   return (
-    <ScrollView style={styles.container} keyboardShouldPersistTaps="handled">
+    <ScrollView
+      style={styles.container}
+      keyboardShouldPersistTaps="handled"
+      keyboardDismissMode="on-drag"
+    >
       <View style={styles.form}>
         {savedRestaurants.length > 0 && (
           <View style={styles.chipsBlock}>
@@ -119,6 +123,7 @@ export function CreateOrderScreen({ navigation }: Props) {
         <TextInput
           style={styles.input}
           placeholder="Sushi Place"
+          placeholderTextColor="#999"
           value={restaurantName}
           onChangeText={setRestaurantName}
           editable={!busy}
@@ -128,6 +133,7 @@ export function CreateOrderScreen({ navigation }: Props) {
         <TextInput
           style={styles.input}
           placeholder="https://..."
+          placeholderTextColor="#999"
           autoCapitalize="none"
           autoCorrect={false}
           keyboardType="url"
@@ -161,6 +167,7 @@ export function CreateOrderScreen({ navigation }: Props) {
         <TextInput
           style={styles.input}
           placeholder="ул. Ленина, 1"
+          placeholderTextColor="#999"
           value={deliveryAddress}
           onChangeText={setDeliveryAddress}
           editable={!busy}
@@ -170,6 +177,7 @@ export function CreateOrderScreen({ navigation }: Props) {
         <TextInput
           style={styles.input}
           placeholder="0.00"
+          placeholderTextColor="#999"
           keyboardType="decimal-pad"
           value={deliveryCost}
           onChangeText={setDeliveryCost}
@@ -180,6 +188,7 @@ export function CreateOrderScreen({ navigation }: Props) {
         <TextInput
           style={styles.input}
           placeholder="например, 50.00"
+          placeholderTextColor="#999"
           keyboardType="decimal-pad"
           value={freeThreshold}
           onChangeText={setFreeThreshold}
@@ -192,7 +201,7 @@ export function CreateOrderScreen({ navigation }: Props) {
           onPress={() => setShowPicker(true)}
           disabled={busy}
         >
-          <Text>
+          <Text style={{ color: '#000' }}>
             {deadline.toLocaleString('ru-RU', {
               day: '2-digit',
               month: '2-digit',
@@ -226,13 +235,15 @@ export function CreateOrderScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
   form: { padding: 16 },
-  label: { fontSize: 14, fontWeight: '500', marginTop: 12, marginBottom: 6 },
+  label: { fontSize: 14, fontWeight: '500', marginTop: 12, marginBottom: 6, color: '#000' },
   input: {
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 8,
     padding: 14,
     fontSize: 16,
+    color: '#000',
+    backgroundColor: '#fff',
   },
   chipsBlock: { marginTop: 12 },
   chipsLabel: { fontSize: 12, color: '#666', marginBottom: 6 },
