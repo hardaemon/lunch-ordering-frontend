@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "mobile",
-    "slug": "mobile",
-    "scheme": "grouporder",
+    "name": "lunch_ordering",
+    "slug": "lunch-ordering",
+    "scheme": "lunchordering",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -15,10 +15,10 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.hardaemon.grouporder"
+      "bundleIdentifier": "com.hardaemon.lunchordering"
     },
     "android": {
-      "package": "com.hardaemon.grouporder",
+      "package": "com.hardaemon.lunchordering",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
