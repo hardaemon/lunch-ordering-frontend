@@ -8,7 +8,9 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import DateTimePicker, {
+  DateTimePickerAndroid,
+} from '@react-native-community/datetimepicker';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ordersApi } from '../api/orders';
 import { savedApi } from '../api/saved';
@@ -27,7 +29,7 @@ export function CreateOrderScreen({ navigation }: Props) {
   const [deliveryCost, setDeliveryCost] = useState('0');
   const [freeThreshold, setFreeThreshold] = useState('');
   const [deadline, setDeadline] = useState(new Date(Date.now() + 30 * 60 * 1000));
-  const [showPicker, setShowPicker] = useState(false);
+  const [showIosPicker, setShowIosPicker] = useState(false);
   const [busy, setBusy] = useState(false);
 
   const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
@@ -83,9 +85,31 @@ export function CreateOrderScreen({ navigation }: Props) {
     }
   };
 
-  const onChangeDate = (event: any, selected?: Date) => {
-    if (Platform.OS === 'android') setShowPicker(false);
-    if (selected) setDeadline(selected);
+  const openDeadlinePicker = () => {
+    if (Platform.OS === 'android') {
+      DateTimePickerAndroid.open({
+        value: deadline,
+        mode: 'date',
+        minimumDate: new Date(),
+        onChange: (_, selectedDate) => {
+          if (!selectedDate) return;
+          DateTimePickerAndroid.open({
+            value: selectedDate,
+            mode: 'time',
+            is24Hour: true,
+            onChange: (_, selectedTime) => {
+              if (!selectedTime) return;
+              const combined = new Date(selectedDate);
+              combined.setHours(selectedTime.getHours());
+              combined.setMinutes(selectedTime.getMinutes());
+              setDeadline(combined);
+            },
+          });
+        },
+      });
+    } else {
+      setShowIosPicker(true);
+    }
   };
 
   return (
@@ -198,7 +222,7 @@ export function CreateOrderScreen({ navigation }: Props) {
         <Text style={styles.label}>Дедлайн сбора позиций</Text>
         <TouchableOpacity
           style={styles.input}
-          onPress={() => setShowPicker(true)}
+          onPress={openDeadlinePicker}
           disabled={busy}
         >
           <Text style={{ color: '#000' }}>
@@ -211,12 +235,15 @@ export function CreateOrderScreen({ navigation }: Props) {
             })}
           </Text>
         </TouchableOpacity>
-        {showPicker && (
+
+        {showIosPicker && Platform.OS === 'ios' && (
           <DateTimePicker
             value={deadline}
             mode="datetime"
-            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-            onChange={onChangeDate}
+            display="spinner"
+            onChange={(_, selected) => {
+              if (selected) setDeadline(selected);
+            }}
             minimumDate={new Date()}
           />
         )}
