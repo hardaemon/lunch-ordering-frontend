@@ -5,6 +5,7 @@ import { profileApi } from '../api/profile';
 import { NotificationPreferences } from '../types/notifications';
 import { toast } from '../utils/toast';
 import { haptics } from '../utils/haptics';
+import { SheetHeader } from '../components/SheetHeader';
 
 const ITEMS: Array<{
   key: keyof NotificationPreferences;
@@ -75,30 +76,32 @@ export function NotificationSettingsScreen() {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.hint}>
-        Управляйте тем, какие уведомления хотите получать. Это влияет только на
-        push-уведомления — события в открытом приложении показываются всегда.
-      </Text>
-      <View style={styles.card}>
-        {ITEMS.map((item, idx) => (
-          <View
-            key={item.key}
-            style={[styles.row, idx < ITEMS.length - 1 && styles.rowDivider]}
-          >
-            <View style={{ flex: 1, marginRight: 12 }}>
-              <Text style={styles.title}>{item.title}</Text>
-              <Text style={styles.description}>{item.description}</Text>
+    <View style={{ flex: 1, backgroundColor: '#f5f5f7' }}>
+      <SheetHeader title="Уведомления" />
+      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+        <Text style={styles.hint}>
+          Управляйте тем, какие push-уведомления хотите получать.
+        </Text>
+        <View style={styles.card}>
+          {ITEMS.map((item, idx) => (
+            <View
+              key={item.key}
+              style={[styles.row, idx < ITEMS.length - 1 && styles.rowDivider]}
+            >
+              <View style={{ flex: 1, marginRight: 12 }}>
+                <Text style={styles.title}>{item.title}</Text>
+                <Text style={styles.description}>{item.description}</Text>
+              </View>
+              <Switch
+                value={prefs[item.key]}
+                onValueChange={() => toggle(item.key)}
+                disabled={busyKey === item.key}
+              />
             </View>
-            <Switch
-              value={prefs[item.key]}
-              onValueChange={() => toggle(item.key)}
-              disabled={busyKey === item.key}
-            />
-          </View>
-        ))}
-      </View>
-    </ScrollView>
+          ))}
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 

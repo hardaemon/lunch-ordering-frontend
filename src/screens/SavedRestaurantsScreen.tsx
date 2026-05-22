@@ -20,6 +20,7 @@ import { EmptyState } from '../components/EmptyState';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { toast } from '../utils/toast';
 import { haptics } from '../utils/haptics';
+import { SheetHeader } from '../components/SheetHeader';
 
 const restaurantApi = {
   list: savedApi.listRestaurants,
@@ -63,6 +64,7 @@ export function SavedRestaurantsScreen() {
 
   return (
     <View style={styles.container}>
+      <SheetHeader title="Сохранённые рестораны" />
       <FlatList
         data={items}
         keyExtractor={(i) => i.id}

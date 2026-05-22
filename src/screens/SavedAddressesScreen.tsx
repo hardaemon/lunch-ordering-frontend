@@ -20,6 +20,7 @@ import { EmptyState } from '../components/EmptyState';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { toast } from '../utils/toast';
 import { haptics } from '../utils/haptics';
+import { SheetHeader } from '../components/SheetHeader';
 
 const addressApi = {
   list: savedApi.listAddresses,
@@ -62,6 +63,7 @@ export function SavedAddressesScreen() {
 
   return (
     <View style={styles.container}>
+      <SheetHeader title="Сохранённые адреса" />
       <FlatList
         data={items}
         keyExtractor={(i) => i.id}

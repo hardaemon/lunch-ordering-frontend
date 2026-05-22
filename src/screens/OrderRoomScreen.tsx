@@ -196,36 +196,41 @@ export function OrderRoomScreen({ route }: Props) {
               )}
             </View>
 
-            <View style={styles.actionsRow}>
-              <TouchableOpacity
-                style={styles.actionBtn}
-                onPress={handleCopyLink}
-                activeOpacity={0.7}
-              >
-                <Text
-                  style={styles.actionBtnText}
-                  numberOfLines={1}
-                  adjustsFontSizeToFit
-                >
-                  Поделиться
-                </Text>
-              </TouchableOpacity>
-              {isOwner && NEXT_STATUS[order.status] && (
-                <TouchableOpacity
-                  style={[styles.actionBtn, styles.primaryBtn]}
-                  onPress={handleAdvanceStatus}
-                  activeOpacity={0.7}
-                >
-                  <Text
-                    style={[styles.actionBtnText, styles.primaryBtnText]}
-                    numberOfLines={1}
-                    adjustsFontSizeToFit
+            {(order.status === OrderStatus.COLLECTING ||
+              (isOwner && NEXT_STATUS[order.status])) && (
+              <View style={styles.actionsRow}>
+                {order.status === OrderStatus.COLLECTING && (
+                  <TouchableOpacity
+                    style={styles.actionBtn}
+                    onPress={handleCopyLink}
+                    activeOpacity={0.7}
                   >
-                    {ORDER_STATUS_LABELS[NEXT_STATUS[order.status]!]}
-                  </Text>
-                </TouchableOpacity>
-              )}
-            </View>
+                    <Text
+                      style={styles.actionBtnText}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                    >
+                      Поделиться
+                    </Text>
+                  </TouchableOpacity>
+                )}
+                {isOwner && NEXT_STATUS[order.status] && (
+                  <TouchableOpacity
+                    style={[styles.actionBtn, styles.primaryBtn]}
+                    onPress={handleAdvanceStatus}
+                    activeOpacity={0.7}
+                  >
+                    <Text
+                      style={[styles.actionBtnText, styles.primaryBtnText]}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                    >
+                      {ORDER_STATUS_LABELS[NEXT_STATUS[order.status]!]}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            )}
 
             <View style={styles.summary}>
               <Text style={styles.summaryRow}>

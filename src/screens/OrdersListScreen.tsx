@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ordersApi } from '../api/orders';
@@ -104,83 +106,77 @@ export function OrdersListScreen({ navigation }: Props) {
     );
   };
 
-  if (isLoading) {
-    return (
-      <View style={styles.container}>
-        <OrderListSkeleton />
-      </View>
-    );
-  }
-
   return (
-    <View style={styles.container}>
-      <FlatList
-        data={filtered}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        contentContainerStyle={styles.list}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-        ListEmptyComponent={
-          <EmptyState
-            icon="🛒"
-            title={tab === 'active' ? 'Активных заказов нет' : 'История пуста'}
-            subtitle={
-              tab === 'active'
-                ? 'Создайте новый или присоединитесь по ссылке'
-                : 'Завершённые заказы появятся здесь'
-            }
-            ctaTitle={tab === 'active' ? 'Создать заказ' : undefined}
-            onCtaPress={
-              tab === 'active'
-                ? () => navigation.navigate('CreateOrder')
-                : undefined
-            }
-          />
-        }
-        ListHeaderComponent={
-          <View>
-            <View style={styles.header}>
-              <Text style={styles.greeting}>Привет, {user?.name}</Text>
-              <TouchableOpacity
-                style={styles.profileBtn}
-                onPress={() => navigation.navigate('Profile')}
-              >
-                <Text style={styles.profileBtnText}>Профиль</Text>
-              </TouchableOpacity>
-            </View>
-            <View style={styles.tabs}>
-              <TouchableOpacity
-                style={[styles.tab, tab === 'active' && styles.tabActive]}
-                onPress={() => setTab('active')}
-              >
-                <Text
-                  style={[
-                    styles.tabText,
-                    tab === 'active' && styles.tabTextActive,
-                  ]}
-                >
-                  Активные
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.tab, tab === 'history' && styles.tabActive]}
-                onPress={() => setTab('history')}
-              >
-                <Text
-                  style={[
-                    styles.tabText,
-                    tab === 'history' && styles.tabTextActive,
-                  ]}
-                >
-                  История
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        }
-      />
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      {/* Зафиксированная верхняя панель */}
+      <View style={styles.topBar}>
+        <Text style={styles.greeting}>Привет, {user?.name}</Text>
+        <TouchableOpacity
+          onPress={() => navigation.navigate('Profile')}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
+          <Ionicons name="person-circle-outline" size={36} color="#007AFF" />
+        </TouchableOpacity>
+      </View>
+
+      {/* Табы — тоже фиксированы */}
+      <View style={styles.tabs}>
+        <TouchableOpacity
+          style={[styles.tab, tab === 'active' && styles.tabActive]}
+          onPress={() => setTab('active')}
+        >
+          <Text
+            style={[styles.tabText, tab === 'active' && styles.tabTextActive]}
+          >
+            Активные
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tab, tab === 'history' && styles.tabActive]}
+          onPress={() => setTab('history')}
+        >
+          <Text
+            style={[styles.tabText, tab === 'history' && styles.tabTextActive]}
+          >
+            История
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Контент */}
+      {isLoading ? (
+        <OrderListSkeleton />
+      ) : (
+        <FlatList
+          data={filtered}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          contentContainerStyle={styles.list}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+          ListEmptyComponent={
+            <EmptyState
+              icon="🛒"
+              title={
+                tab === 'active' ? 'Активных заказов нет' : 'История пуста'
+              }
+              subtitle={
+                tab === 'active'
+                  ? 'Создайте новый или присоединитесь по ссылке'
+                  : 'Завершённые заказы появятся здесь'
+              }
+              ctaTitle={tab === 'active' ? 'Создать заказ' : undefined}
+              onCtaPress={
+                tab === 'active'
+                  ? () => navigation.navigate('CreateOrder')
+                  : undefined
+              }
+            />
+          }
+        />
+      )}
+
       <TouchableOpacity
         style={styles.fab}
         onPress={() => {
@@ -191,38 +187,34 @@ export function OrdersListScreen({ navigation }: Props) {
       >
         <Text style={styles.fabText}>+</Text>
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f5f5f7' },
-  list: { padding: 16, paddingBottom: 100 },
-  header: {
+  topBar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 16,
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 12,
   },
-  greeting: { fontSize: 22, fontWeight: '700' },
-  profileBtn: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 16,
-    backgroundColor: '#E8F0FE',
-  },
-  profileBtnText: { color: '#007AFF', fontWeight: '600' },
+  greeting: { fontSize: 22, fontWeight: '700', color: '#000', flex: 1 },
   tabs: {
     flexDirection: 'row',
     backgroundColor: '#fff',
     borderRadius: 10,
     padding: 4,
+    marginHorizontal: 16,
     marginBottom: 12,
   },
   tab: { flex: 1, padding: 10, borderRadius: 8, alignItems: 'center' },
   tabActive: { backgroundColor: '#007AFF' },
   tabText: { color: '#666', fontWeight: '500' },
   tabTextActive: { color: '#fff' },
+  list: { paddingHorizontal: 16, paddingBottom: 100 },
   card: {
     backgroundColor: '#fff',
     borderRadius: 12,

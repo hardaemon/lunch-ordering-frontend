@@ -14,6 +14,7 @@ import { ProfileScreen } from '../screens/ProfileScreen';
 import { SavedAddressesScreen } from '../screens/SavedAddressesScreen';
 import { SavedRestaurantsScreen } from '../screens/SavedRestaurantsScreen';
 import { NotificationSettingsScreen } from '../screens/NotificationSettingsScreen';
+import { ChangePasswordScreen } from '../screens/ChangePasswordScreen';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -28,6 +29,7 @@ export type AppStackParamList = {
   SavedAddresses: undefined;
   SavedRestaurants: undefined;
   NotificationSettings: undefined;
+  ChangePassword: undefined;
 };
 
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
@@ -43,9 +45,10 @@ const linking = {
       Profile: 'profile',
       SavedAddresses: 'profile/addresses',
       SavedRestaurants: 'profile/restaurants',
+      NotificationSettings: 'profile/notifications',
+      ChangePassword: 'profile/password',
       Login: 'login',
       Register: 'register',
-      NotificationSettings: 'profile/notifications',
     },
   },
 };
@@ -53,12 +56,24 @@ const linking = {
 function AuthenticatedApp() {
   usePushNotifications();
 
+  const sheetOptions = {
+    headerShown: false,
+    presentation: 'formSheet' as const,
+    sheetAllowedDetents: [0.95],
+    sheetGrabberVisible: true,
+    sheetCornerRadius: 16,
+  };
+
   return (
-    <AppStack.Navigator>
+    <AppStack.Navigator
+      screenOptions={{
+        headerBackButtonDisplayMode: 'minimal',
+      }}
+    >
       <AppStack.Screen
         name="OrdersList"
         component={OrdersListScreen}
-        options={{ title: 'Мои заказы' }}
+        options={{ headerShown: false }}
       />
       <AppStack.Screen
         name="CreateOrder"
@@ -73,22 +88,27 @@ function AuthenticatedApp() {
       <AppStack.Screen
         name="Profile"
         component={ProfileScreen}
-        options={{ title: 'Профиль' }}
+        options={sheetOptions}
       />
       <AppStack.Screen
         name="SavedAddresses"
         component={SavedAddressesScreen}
-        options={{ title: 'Адреса' }}
+        options={sheetOptions}
       />
       <AppStack.Screen
         name="SavedRestaurants"
         component={SavedRestaurantsScreen}
-        options={{ title: 'Рестораны' }}
+        options={sheetOptions}
       />
       <AppStack.Screen
         name="NotificationSettings"
         component={NotificationSettingsScreen}
-        options={{ title: 'Уведомления' }}
+        options={sheetOptions}
+      />
+      <AppStack.Screen
+        name="ChangePassword"
+        component={ChangePasswordScreen}
+        options={sheetOptions}
       />
     </AppStack.Navigator>
   );
