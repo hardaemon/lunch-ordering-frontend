@@ -22,6 +22,7 @@ import { toast } from '../utils/toast';
 import { haptics } from '../utils/haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SheetHeader } from '../components/SheetHeader';
+import Toast from 'react-native-toast-message';
 
 const restaurantApi = {
   list: savedApi.listRestaurants,
@@ -204,14 +205,18 @@ function EditRestaurantModal({
               onPress={onClose}
               disabled={busy}
             >
-              <Text style={{ color: '#000' }}>Отмена</Text>
+              <Text style={styles.cancelBtnText}>Отмена</Text>
             </TouchableOpacity>
-            <View style={{ flex: 1 }}>
-              <PrimaryButton title="Сохранить" onPress={submit} busy={busy} />
-            </View>
+            <PrimaryButton
+              title="Сохранить"
+              onPress={submit}
+              busy={busy}
+              style={{ flex: 1 }}
+            />
           </View>
         </Pressable>
       </KeyboardAvoidingView>
+      <Toast />
     </Modal>
   );
 }
@@ -284,6 +289,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   modalActions: { flexDirection: 'row', gap: 8 },
-  modalBtn: { flex: 1, padding: 14, borderRadius: 8, alignItems: 'center' },
+  modalBtn: {
+    flex: 1,
+    padding: 14,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 50,
+  },
   cancelBtn: { backgroundColor: '#f0f0f0' },
+  cancelBtnText: { color: '#000', fontSize: 16, fontWeight: '600' },
 });

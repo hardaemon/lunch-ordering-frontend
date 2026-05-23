@@ -43,6 +43,7 @@ import { PrimaryButton } from '../components/PrimaryButton';
 import { toast } from '../utils/toast';
 import { haptics } from '../utils/haptics';
 import type { AppStackParamList } from '../navigation/RootNavigator';
+import Toast from 'react-native-toast-message';
 
 type Props = NativeStackScreenProps<AppStackParamList, 'OrderRoom'>;
 
@@ -621,13 +622,14 @@ function ChangeStatusModal({
             </TouchableOpacity>
           ))}
           <TouchableOpacity
-            style={[styles.modalBtn, styles.cancelBtn, { marginTop: 8 }]}
+            style={[styles.cancelStandalone, { marginTop: 8 }]}
             onPress={onClose}
           >
-            <Text style={{ color: '#000' }}>Отмена</Text>
+            <Text style={styles.cancelBtnText}>Отмена</Text>
           </TouchableOpacity>
         </View>
       </View>
+      <Toast />
     </Modal>
   );
 }
@@ -739,6 +741,7 @@ function AddItemModal({
           </View>
         </Pressable>
       </KeyboardAvoidingView>
+      <Toast />
     </Modal>
   );
 }
@@ -772,6 +775,14 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: '#fff',
     alignItems: 'center',
+  },
+  cancelStandalone: {
+    padding: 14,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 50,
+    backgroundColor: '#f0f0f0',
   },
   actionBtnText: { color: '#007AFF', fontWeight: '600' },
   primaryBtn: { backgroundColor: '#007AFF' },

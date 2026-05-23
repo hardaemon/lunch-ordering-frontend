@@ -59,6 +59,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: 50,
+    alignSelf: 'stretch',
   },
   disabled: { opacity: 0.6 },
   text: { color: '#fff', fontSize: 16, fontWeight: '600' },

@@ -95,7 +95,6 @@ export const COMPLAINT_FROM: OrderStatus[] = [
 
 // Когда заказ в претензии — на какие статусы можно вернуть
 export const COMPLAINT_RESOLUTIONS: OrderStatus[] = [
-  OrderStatus.COLLECTING,
   OrderStatus.CONFIRMING,
   OrderStatus.PREPARING,
   OrderStatus.ON_THE_WAY,
