@@ -20,6 +20,7 @@ import { EmptyState } from '../components/EmptyState';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { toast } from '../utils/toast';
 import { haptics } from '../utils/haptics';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SheetHeader } from '../components/SheetHeader';
 
 const addressApi = {
@@ -30,9 +31,10 @@ const addressApi = {
 };
 
 export function SavedAddressesScreen() {
-  const { items, create, update, remove } = useSavedItems<SavedAddress>(addressApi);
+  const { items, isLoading, create, update, remove } = useSavedItems<SavedAddress>(addressApi);
   const [editing, setEditing] = useState<SavedAddress | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const insets = useSafeAreaInsets();
 
   const openCreate = () => {
     setEditing(null);
@@ -61,13 +63,18 @@ export function SavedAddressesScreen() {
     ]);
   };
 
+  const isEmpty = items.length === 0;
+
   return (
     <View style={styles.container}>
-      <SheetHeader title="Сохранённые адреса" />
+      <View style={styles.headerWrap}>
+        <SheetHeader title="Сохранённые адреса" />
+      </View>
       <FlatList
+        style={styles.listAbsolute}
         data={items}
         keyExtractor={(i) => i.id}
-        contentContainerStyle={styles.list}
+        contentContainerStyle={isEmpty ? styles.listEmpty : styles.list}
         renderItem={({ item }) => (
           <TouchableOpacity
             style={styles.row}
@@ -82,17 +89,19 @@ export function SavedAddressesScreen() {
           </TouchableOpacity>
         )}
         ListEmptyComponent={
-          <EmptyState
-            icon="📍"
-            title="Адресов пока нет"
-            subtitle="Добавьте часто используемые — они появятся при создании заказа"
-            ctaTitle="Добавить адрес"
-            onCtaPress={openCreate}
-          />
+          isLoading ? null : (
+            <EmptyState
+              icon="📍"
+              title="Адресов пока нет"
+              subtitle="Добавьте часто используемые — они появятся при создании заказа"
+              ctaTitle="Добавить адрес"
+              onCtaPress={openCreate}
+            />
+          )
         }
       />
       <TouchableOpacity
-        style={styles.fab}
+        style={[styles.fab, { bottom: insets.bottom + 20 }]}
         onPress={() => {
           haptics.light();
           openCreate();
@@ -201,20 +210,45 @@ function EditAddressModal({
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f5f5f7' },
-  list: { padding: 16, paddingBottom: 100, flexGrow: 1 },
+  headerWrap: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
+  },
+  listAbsolute: {
+    position: 'absolute',
+    top: 50,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  list: {
+    padding: 16,
+    paddingTop: 22,
+    paddingBottom: 100,
+  },
+  listEmpty: {
+    flexGrow: 1,
+    alignItems: 'center',
+    padding: 16,
+    paddingTop: 86,
+    paddingBottom: 100,
+  },
   row: { backgroundColor: '#fff', padding: 14, borderRadius: 10, marginBottom: 8 },
   label: { fontSize: 16, fontWeight: '600', color: '#000' },
   value: { fontSize: 14, color: '#666', marginTop: 4 },
   fab: {
     position: 'absolute',
     right: 20,
-    bottom: 30,
     width: 60,
     height: 60,
     borderRadius: 30,
     backgroundColor: '#007AFF',
     alignItems: 'center',
     justifyContent: 'center',
+    zIndex: 20,
     elevation: 6,
     shadowColor: '#000',
     shadowOpacity: 0.2,

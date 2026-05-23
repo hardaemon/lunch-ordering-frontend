@@ -12,6 +12,7 @@ import { useAuth } from '../auth/AuthContext';
 import { profileApi } from '../api/profile';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { toast } from '../utils/toast';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { AppStackParamList } from '../navigation/RootNavigator';
 import { SheetHeader } from '../components/SheetHeader';
 
@@ -22,6 +23,7 @@ export function ProfileScreen({ navigation }: Props) {
   const [name, setName] = useState(user?.name ?? '');
   const [email, setEmail] = useState(user?.email ?? '');
   const [busy, setBusy] = useState(false);
+  const insets = useSafeAreaInsets();
 
   const save = async () => {
     if (!name.trim()) {
@@ -53,15 +55,19 @@ export function ProfileScreen({ navigation }: Props) {
 
   return (
     <View style={styles.container}>
-      <SheetHeader title="Профиль" />
-
+      <View style={styles.headerWrap}>
+        <SheetHeader title="Профиль" />
+      </View>
       <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.content}
+        style={styles.scrollAbsolute}
+        contentContainerStyle={{
+          padding: 16,
+          paddingTop: 22,
+          paddingBottom: insets.bottom + 40,
+        }}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
         showsVerticalScrollIndicator={false}
-        bounces
       >
         <View style={styles.card}>
           <Text style={styles.label}>Имя</Text>
@@ -72,7 +78,6 @@ export function ProfileScreen({ navigation }: Props) {
             onChangeText={setName}
             editable={!busy}
           />
-
           <Text style={[styles.label, { marginTop: 16 }]}>Email</Text>
           <TextInput
             style={styles.input}
@@ -84,7 +89,6 @@ export function ProfileScreen({ navigation }: Props) {
             onChangeText={setEmail}
             editable={!busy}
           />
-
           <PrimaryButton
             title="Сохранить"
             onPress={save}
@@ -96,7 +100,7 @@ export function ProfileScreen({ navigation }: Props) {
         <TouchableOpacity
           style={styles.row}
           onPress={() => navigation.navigate('SavedAddresses')}
-          activeOpacity={1}
+          activeOpacity={0.6}
         >
           <Text style={styles.rowText}>Сохранённые адреса</Text>
           <Text style={styles.rowArrow}>›</Text>
@@ -105,7 +109,7 @@ export function ProfileScreen({ navigation }: Props) {
         <TouchableOpacity
           style={styles.row}
           onPress={() => navigation.navigate('SavedRestaurants')}
-          activeOpacity={1}
+          activeOpacity={0.6}
         >
           <Text style={styles.rowText}>Сохранённые рестораны</Text>
           <Text style={styles.rowArrow}>›</Text>
@@ -114,7 +118,7 @@ export function ProfileScreen({ navigation }: Props) {
         <TouchableOpacity
           style={styles.row}
           onPress={() => navigation.navigate('ChangePassword')}
-          activeOpacity={1}
+          activeOpacity={0.6}
         >
           <Text style={styles.rowText}>Сменить пароль</Text>
           <Text style={styles.rowArrow}>›</Text>
@@ -123,7 +127,7 @@ export function ProfileScreen({ navigation }: Props) {
         <TouchableOpacity
           style={styles.row}
           onPress={() => navigation.navigate('NotificationSettings')}
-          activeOpacity={1}
+          activeOpacity={0.6}
         >
           <Text style={styles.rowText}>Уведомления</Text>
           <Text style={styles.rowArrow}>›</Text>
@@ -132,7 +136,7 @@ export function ProfileScreen({ navigation }: Props) {
         <TouchableOpacity
           style={[styles.row, styles.logoutRow]}
           onPress={logout}
-          activeOpacity={1}
+          activeOpacity={0.6}
         >
           <Text style={styles.logoutText}>Выйти</Text>
         </TouchableOpacity>
@@ -143,8 +147,20 @@ export function ProfileScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f5f5f7' },
-  scroll: { flex: 1 },
-  content: { padding: 16, paddingBottom: 40 },
+  headerWrap: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
+  },
+  scrollAbsolute: {
+    position: 'absolute',
+    top: 50,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
   card: {
     backgroundColor: '#fff',
     padding: 16,

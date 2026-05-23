@@ -19,19 +19,24 @@ import { EmptyState } from '../components/EmptyState';
 import { toast } from '../utils/toast';
 import { haptics } from '../utils/haptics';
 import type { AppStackParamList } from '../navigation/RootNavigator';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type Props = NativeStackScreenProps<AppStackParamList, 'OrdersList'>;
 
 const STATUS_COLORS: Record<OrderStatus, string> = {
   [OrderStatus.COLLECTING]: '#007AFF',
+  [OrderStatus.CONFIRMING]: '#5AC8FA',
   [OrderStatus.PREPARING]: '#FF9500',
   [OrderStatus.ON_THE_WAY]: '#5856D6',
   [OrderStatus.DELIVERED]: '#34C759',
   [OrderStatus.CLOSED]: '#8E8E93',
+  [OrderStatus.CANCELLED]: '#FF3B30',
+  [OrderStatus.COMPLAINT]: '#AF52DE',
 };
 
 export function OrdersListScreen({ navigation }: Props) {
   const { user } = useAuth();
+  const insets = useSafeAreaInsets();
   const [orders, setOrders] = useState<Order[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -60,10 +65,15 @@ export function OrdersListScreen({ navigation }: Props) {
     setRefreshing(false);
   }, [load]);
 
+  const FINISHED_STATUSES = [
+    OrderStatus.CLOSED,
+    OrderStatus.CANCELLED,
+  ];
+
   const filtered = orders.filter((o) =>
     tab === 'active'
-      ? o.status !== OrderStatus.CLOSED
-      : o.status === OrderStatus.CLOSED,
+      ? !FINISHED_STATUSES.includes(o.status)
+      : FINISHED_STATUSES.includes(o.status),
   );
 
   const renderItem = ({ item }: { item: Order }) => {
@@ -178,7 +188,7 @@ export function OrdersListScreen({ navigation }: Props) {
       )}
 
       <TouchableOpacity
-        style={styles.fab}
+        style={[styles.fab, { bottom: insets.bottom + 20 }]}
         onPress={() => {
           haptics.light();
           navigation.navigate('CreateOrder');
@@ -236,7 +246,6 @@ const styles = StyleSheet.create({
   fab: {
     position: 'absolute',
     right: 20,
-    bottom: 30,
     width: 60,
     height: 60,
     borderRadius: 30,

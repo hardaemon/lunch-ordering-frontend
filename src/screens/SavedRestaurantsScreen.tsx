@@ -20,6 +20,7 @@ import { EmptyState } from '../components/EmptyState';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { toast } from '../utils/toast';
 import { haptics } from '../utils/haptics';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SheetHeader } from '../components/SheetHeader';
 
 const restaurantApi = {
@@ -30,10 +31,11 @@ const restaurantApi = {
 };
 
 export function SavedRestaurantsScreen() {
-  const { items, create, update, remove } =
+  const { items, isLoading, create, update, remove } =
     useSavedItems<SavedRestaurant>(restaurantApi);
   const [editing, setEditing] = useState<SavedRestaurant | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const insets = useSafeAreaInsets();
 
   const openCreate = () => {
     setEditing(null);
@@ -62,13 +64,18 @@ export function SavedRestaurantsScreen() {
     ]);
   };
 
+  const isEmpty = items.length === 0;
+
   return (
     <View style={styles.container}>
-      <SheetHeader title="Сохранённые рестораны" />
+      <View style={styles.headerWrap}>
+        <SheetHeader title="Сохранённые рестораны" />
+      </View>
       <FlatList
+        style={styles.listAbsolute}
         data={items}
         keyExtractor={(i) => i.id}
-        contentContainerStyle={styles.list}
+        contentContainerStyle={isEmpty ? styles.listEmpty : styles.list}
         renderItem={({ item }) => (
           <TouchableOpacity
             style={styles.row}
@@ -87,17 +94,19 @@ export function SavedRestaurantsScreen() {
           </TouchableOpacity>
         )}
         ListEmptyComponent={
-          <EmptyState
-            icon="🍽️"
-            title="Ресторанов пока нет"
-            subtitle="Добавьте любимые — они появятся при создании заказа"
-            ctaTitle="Добавить ресторан"
-            onCtaPress={openCreate}
-          />
+          isLoading ? null : (
+            <EmptyState
+              icon="🍽️"
+              title="Ресторанов пока нет"
+              subtitle="Добавьте любимые — они появятся при создании заказа"
+              ctaTitle="Добавить ресторан"
+              onCtaPress={openCreate}
+            />
+          )
         }
       />
       <TouchableOpacity
-        style={styles.fab}
+        style={[styles.fab, { bottom: insets.bottom + 20 }]}
         onPress={() => {
           haptics.light();
           openCreate();
@@ -209,20 +218,45 @@ function EditRestaurantModal({
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f5f5f7' },
-  list: { padding: 16, paddingBottom: 100, flexGrow: 1 },
+  headerWrap: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
+  },
+  listAbsolute: {
+    position: 'absolute',
+    top: 50,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  list: {
+    padding: 16,
+    paddingTop: 22,
+    paddingBottom: 100,
+  },
+  listEmpty: {
+    flexGrow: 1,
+    alignItems: 'center',
+    padding: 16,
+    paddingTop: 86,
+    paddingBottom: 100,
+  },
   row: { backgroundColor: '#fff', padding: 14, borderRadius: 10, marginBottom: 8 },
   name: { fontSize: 16, fontWeight: '600', color: '#000' },
   url: { fontSize: 13, color: '#007AFF', marginTop: 4 },
   fab: {
     position: 'absolute',
     right: 20,
-    bottom: 30,
     width: 60,
     height: 60,
     borderRadius: 30,
     backgroundColor: '#007AFF',
     alignItems: 'center',
     justifyContent: 'center',
+    zIndex: 20,
     elevation: 6,
     shadowColor: '#000',
     shadowOpacity: 0.2,

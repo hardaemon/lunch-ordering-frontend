@@ -11,13 +11,16 @@ export function SheetHeader({ title }: { title: string }) {
 
 const styles = StyleSheet.create({
   headerBar: {
-    paddingHorizontal: 16,
-    paddingTop: Platform.OS === 'ios' ? 28 : 14,
-    paddingBottom: 12,
-    alignItems: 'center',
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#e0e0e0',
-    backgroundColor: '#f5f5f7',
-  },
+  paddingHorizontal: 16,
+  paddingTop: Platform.OS === 'ios' ? 24 : 14,
+  paddingBottom: 14,
+  alignItems: 'center',
+  backgroundColor: '#f5f5f7',
+  shadowColor: '#000',
+  shadowOpacity: 0.05,
+  shadowRadius: 3,
+  shadowOffset: { width: 0, height: 2 },
+  elevation: 2,
+},
   headerTitle: { fontSize: 17, fontWeight: '600', color: '#000' },
 });

@@ -12,6 +12,7 @@ import { PrimaryButton } from '../components/PrimaryButton';
 import { toast } from '../utils/toast';
 import { haptics } from '../utils/haptics';
 import type { AppStackParamList } from '../navigation/RootNavigator';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SheetHeader } from '../components/SheetHeader';
 
 type Props = NativeStackScreenProps<AppStackParamList, 'ChangePassword'>;
@@ -21,6 +22,7 @@ export function ChangePasswordScreen({ navigation }: Props) {
   const [next, setNext] = useState('');
   const [confirm, setConfirm] = useState('');
   const [busy, setBusy] = useState(false);
+  const insets = useSafeAreaInsets();
 
   const submit = async () => {
     if (!current || !next || !confirm) {
@@ -58,9 +60,11 @@ export function ChangePasswordScreen({ navigation }: Props) {
 
   return (
     <View style={{ flex: 1, backgroundColor: '#f5f5f7' }}>
-      <SheetHeader title="Смена пароля" />
+      <View style={styles.headerWrap}>
+        <SheetHeader title="Смена пароля" />
+      </View>
       <ScrollView
-        style={styles.container}
+        style={styles.scrollAbsolute}
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
@@ -128,5 +132,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#000',
     backgroundColor: '#fff',
+  },
+  headerWrap: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
+  },
+  scrollAbsolute: {
+    position: 'absolute',
+    top: 50,
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
 });

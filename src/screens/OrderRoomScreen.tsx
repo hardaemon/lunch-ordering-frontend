@@ -1,21 +1,21 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Alert,
   FlatList,
   Keyboard,
+  KeyboardAvoidingView,
   Modal,
+  Platform,
   Pressable,
   RefreshControl,
+  Share,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
-  KeyboardAvoidingView,
-  Platform,
 } from 'react-native';
 import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
-import * as Clipboard from 'expo-clipboard';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useOrderRoom } from '../hooks/useOrderRoom';
 import { ordersApi } from '../api/orders';
@@ -25,6 +25,9 @@ import {
   OrderItem as OrderItemType,
   OrderStatus,
   NEXT_STATUS,
+  CANCELLABLE_FROM,
+  COMPLAINT_FROM,
+  COMPLAINT_RESOLUTIONS,
 } from '../types/order';
 import {
   formatMoney,
@@ -49,6 +52,7 @@ export function OrderRoomScreen({ route }: Props) {
   const { order, isLoading, error, reload } = useOrderRoom(orderId);
 
   const [addModalVisible, setAddModalVisible] = useState(false);
+  const [statusModalVisible, setStatusModalVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
   if (isLoading) {
@@ -71,8 +75,7 @@ export function OrderRoomScreen({ route }: Props) {
   const isOwner = order.ownerId === user!.id;
   const me = order.participants.find((p) => p.userId === user!.id);
   const isParticipant = !!me;
-  const canEdit =
-    order.status === OrderStatus.COLLECTING &&
+  const canEdit = order.status === OrderStatus.COLLECTING &&
     new Date(order.deadlineAt).getTime() > Date.now();
 
   const myItems = order.items.filter((i) => i.addedById === user!.id);
@@ -83,17 +86,31 @@ export function OrderRoomScreen({ route }: Props) {
   const myDelivery = userDeliveryShare(order, user!.id);
   const myGrand = userGrandTotal(order, user!.id);
 
+  const showShare = order.status === OrderStatus.COLLECTING;
+  const showAdvance = isOwner && !!NEXT_STATUS[order.status];
+  const showCancel = isOwner && CANCELLABLE_FROM.includes(order.status);
+  const showComplaint = isOwner && COMPLAINT_FROM.includes(order.status);
+  const showChangeStatus = isOwner && order.status === OrderStatus.COMPLAINT;
+
   const handleRefresh = async () => {
     setRefreshing(true);
     await reload();
     setRefreshing(false);
   };
 
-  const handleCopyLink = async () => {
-    const link = `grouporder://order/${order.id}`;
-    await Clipboard.setStringAsync(link);
-    haptics.light();
-    toast.success('Ссылка скопирована');
+  const handleShareInvite = async () => {
+    try {
+      const link = `grouporder://order/${order.id}`;
+      await Share.share({
+        message:
+          `Присоединяйся к заказу из ${order.restaurantName}!\n\n` +
+          `Открой ссылку в приложении: ${link}`,
+        title: `Заказ из ${order.restaurantName}`,
+      });
+      haptics.light();
+    } catch (e: any) {
+      toast.error('Не удалось поделиться');
+    }
   };
 
   const handleAdvanceStatus = async () => {
@@ -104,6 +121,60 @@ export function OrderRoomScreen({ route }: Props) {
       haptics.success();
     } catch (e: any) {
       haptics.error();
+      toast.error('Не удалось', e?.response?.data?.message);
+    }
+  };
+
+  const handleOpenComplaint = () => {
+    Alert.alert(
+      'Открыть претензии?',
+      'Заказ перейдёт в статус «Претензии». Из него можно вернуть на любой этап или отменить.',
+      [
+        { text: 'Отмена', style: 'cancel' },
+        {
+          text: 'Открыть',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await ordersApi.update(order.id, {
+                status: OrderStatus.COMPLAINT,
+              });
+              haptics.warning();
+            } catch (e: any) {
+              toast.error('Не удалось', e?.response?.data?.message);
+            }
+          },
+        },
+      ],
+    );
+  };
+
+  const handleCancelOrder = () => {
+    Alert.alert('Отменить заказ?', 'Это действие нельзя отменить.', [
+      { text: 'Не отменять', style: 'cancel' },
+      {
+        text: 'Отменить заказ',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await ordersApi.update(order.id, {
+              status: OrderStatus.CANCELLED,
+            });
+            haptics.warning();
+          } catch (e: any) {
+            toast.error('Не удалось', e?.response?.data?.message);
+          }
+        },
+      },
+    ]);
+  };
+
+  const handleChangeStatusTo = async (target: OrderStatus) => {
+    setStatusModalVisible(false);
+    try {
+      await ordersApi.update(order.id, { status: target });
+      haptics.success();
+    } catch (e: any) {
       toast.error('Не удалось', e?.response?.data?.message);
     }
   };
@@ -178,7 +249,14 @@ export function OrderRoomScreen({ route }: Props) {
           <View>
             <View style={styles.header}>
               <View style={styles.statusRow}>
-                <Text style={styles.statusBadge}>
+                <Text
+                  style={[
+                    styles.statusBadge,
+                    {
+                      backgroundColor: STATUS_BG[order.status] || '#007AFF',
+                    },
+                  ]}
+                >
                   {ORDER_STATUS_LABELS[order.status]}
                 </Text>
               </View>
@@ -196,13 +274,13 @@ export function OrderRoomScreen({ route }: Props) {
               )}
             </View>
 
-            {(order.status === OrderStatus.COLLECTING ||
-              (isOwner && NEXT_STATUS[order.status])) && (
+            {/* Главная кнопка-действие — переход по флоу */}
+            {(showAdvance || showChangeStatus || showShare) && (
               <View style={styles.actionsRow}>
-                {order.status === OrderStatus.COLLECTING && (
+                {showShare && (
                   <TouchableOpacity
                     style={styles.actionBtn}
-                    onPress={handleCopyLink}
+                    onPress={handleShareInvite}
                     activeOpacity={0.7}
                   >
                     <Text
@@ -214,7 +292,7 @@ export function OrderRoomScreen({ route }: Props) {
                     </Text>
                   </TouchableOpacity>
                 )}
-                {isOwner && NEXT_STATUS[order.status] && (
+                {showAdvance && (
                   <TouchableOpacity
                     style={[styles.actionBtn, styles.primaryBtn]}
                     onPress={handleAdvanceStatus}
@@ -226,6 +304,57 @@ export function OrderRoomScreen({ route }: Props) {
                       adjustsFontSizeToFit
                     >
                       {ORDER_STATUS_LABELS[NEXT_STATUS[order.status]!]}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+                {showChangeStatus && (
+                  <TouchableOpacity
+                    style={[styles.actionBtn, styles.primaryBtn]}
+                    onPress={() => setStatusModalVisible(true)}
+                    activeOpacity={0.7}
+                  >
+                    <Text
+                      style={[styles.actionBtnText, styles.primaryBtnText]}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                    >
+                      Сменить статус
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            )}
+
+            {/* Вторичные действия: претензии + отмена */}
+            {(showComplaint || showCancel) && (
+              <View style={styles.actionsRow}>
+                {showComplaint && (
+                  <TouchableOpacity
+                    style={[styles.actionBtn, styles.warningBtn]}
+                    onPress={handleOpenComplaint}
+                    activeOpacity={0.7}
+                  >
+                    <Text
+                      style={[styles.actionBtnText, styles.warningBtnText]}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                    >
+                      Претензии
+                    </Text>
+                  </TouchableOpacity>
+                )}
+                {showCancel && (
+                  <TouchableOpacity
+                    style={[styles.actionBtn, styles.dangerBtn]}
+                    onPress={handleCancelOrder}
+                    activeOpacity={0.7}
+                  >
+                    <Text
+                      style={[styles.actionBtnText, styles.dangerBtnText]}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                    >
+                      Отменить
                     </Text>
                   </TouchableOpacity>
                 )}
@@ -308,9 +437,29 @@ export function OrderRoomScreen({ route }: Props) {
         onClose={() => setAddModalVisible(false)}
         orderId={order.id}
       />
+
+      <ChangeStatusModal
+        visible={statusModalVisible}
+        onClose={() => setStatusModalVisible(false)}
+        currentStatus={order.status}
+        onSelect={handleChangeStatusTo}
+      />
     </View>
   );
 }
+
+// ============== Цвета статусов ==============
+
+const STATUS_BG: Partial<Record<OrderStatus, string>> = {
+  [OrderStatus.COLLECTING]: '#007AFF',
+  [OrderStatus.CONFIRMING]: '#5AC8FA',
+  [OrderStatus.PREPARING]: '#FF9500',
+  [OrderStatus.ON_THE_WAY]: '#5856D6',
+  [OrderStatus.DELIVERED]: '#34C759',
+  [OrderStatus.CLOSED]: '#8E8E93',
+  [OrderStatus.CANCELLED]: '#FF3B30',
+  [OrderStatus.COMPLAINT]: '#AF52DE',
+};
 
 // ============== Компоненты-помощники ==============
 
@@ -427,6 +576,59 @@ function ParticipantsBlock({
         );
       })}
     </View>
+  );
+}
+
+function ChangeStatusModal({
+  visible,
+  onClose,
+  currentStatus,
+  onSelect,
+}: {
+  visible: boolean;
+  onClose: () => void;
+  currentStatus: OrderStatus;
+  onSelect: (target: OrderStatus) => void;
+}) {
+  const options = COMPLAINT_RESOLUTIONS.filter((s) => s !== currentStatus);
+
+  return (
+    <Modal
+      visible={visible}
+      animationType="slide"
+      transparent
+      onRequestClose={onClose}
+    >
+      <View style={styles.modalOverlay}>
+        <Pressable style={styles.modalBackdrop} onPress={onClose} />
+        <View style={styles.modal}>
+          <Text style={styles.modalTitle}>Куда вернуть заказ?</Text>
+          {options.map((s) => (
+            <TouchableOpacity
+              key={s}
+              style={styles.statusOption}
+              onPress={() => onSelect(s)}
+            >
+              <View
+                style={[
+                  styles.statusDot,
+                  { backgroundColor: STATUS_BG[s] || '#007AFF' },
+                ]}
+              />
+              <Text style={styles.statusOptionText}>
+                {ORDER_STATUS_LABELS[s]}
+              </Text>
+            </TouchableOpacity>
+          ))}
+          <TouchableOpacity
+            style={[styles.modalBtn, styles.cancelBtn, { marginTop: 8 }]}
+            onPress={onClose}
+          >
+            <Text style={{ color: '#000' }}>Отмена</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
   );
 }
 
@@ -549,11 +751,9 @@ const styles = StyleSheet.create({
   statusRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     marginBottom: 8,
   },
   statusBadge: {
-    backgroundColor: '#007AFF',
     color: '#fff',
     paddingHorizontal: 10,
     paddingVertical: 4,
@@ -576,6 +776,10 @@ const styles = StyleSheet.create({
   actionBtnText: { color: '#007AFF', fontWeight: '600' },
   primaryBtn: { backgroundColor: '#007AFF' },
   primaryBtnText: { color: '#fff' },
+  warningBtn: { backgroundColor: '#AF52DE' },
+  warningBtnText: { color: '#fff' },
+  dangerBtn: { backgroundColor: '#FF3B30' },
+  dangerBtnText: { color: '#fff' },
   summary: { backgroundColor: '#fff', padding: 16, borderRadius: 12, marginBottom: 12 },
   summaryRow: { fontSize: 15, marginBottom: 4, color: '#000' },
   summaryGrand: { fontSize: 18, fontWeight: '700', marginTop: 8, color: '#000' },
@@ -664,4 +868,14 @@ const styles = StyleSheet.create({
   modalBtn: { flex: 1, padding: 14, borderRadius: 8, alignItems: 'center' },
   cancelBtn: { backgroundColor: '#f0f0f0' },
   cancelBtnText: { color: '#333', fontWeight: '600' },
+  statusOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 14,
+    borderRadius: 8,
+    backgroundColor: '#f5f5f7',
+    marginBottom: 8,
+  },
+  statusDot: { width: 10, height: 10, borderRadius: 5, marginRight: 10 },
+  statusOptionText: { fontSize: 16, color: '#000' },
 });

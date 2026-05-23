@@ -1,9 +1,12 @@
 export enum OrderStatus {
   COLLECTING = 'collecting',
+  CONFIRMING = 'confirming',
   PREPARING = 'preparing',
   ON_THE_WAY = 'on_the_way',
   DELIVERED = 'delivered',
   CLOSED = 'closed',
+  CANCELLED = 'cancelled',
+  COMPLAINT = 'complaint',
 }
 
 export type PublicUser = {
@@ -54,16 +57,48 @@ export type Order = {
 
 export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
   [OrderStatus.COLLECTING]: 'Сбор позиций',
+  [OrderStatus.CONFIRMING]: 'Подтверждение',
   [OrderStatus.PREPARING]: 'Готовится',
   [OrderStatus.ON_THE_WAY]: 'В пути',
   [OrderStatus.DELIVERED]: 'Доставлено',
   [OrderStatus.CLOSED]: 'Закрыт',
+  [OrderStatus.CANCELLED]: 'Отменён',
+  [OrderStatus.COMPLAINT]: 'Претензии',
 };
 
-// Порядок переходов статусов — следующий статус для кнопки "Дальше"
+// "Следующий" статус по основному потоку (для кнопки прогресса)
 export const NEXT_STATUS: Partial<Record<OrderStatus, OrderStatus>> = {
-  [OrderStatus.COLLECTING]: OrderStatus.PREPARING,
+  [OrderStatus.COLLECTING]: OrderStatus.CONFIRMING,
+  [OrderStatus.CONFIRMING]: OrderStatus.PREPARING,
   [OrderStatus.PREPARING]: OrderStatus.ON_THE_WAY,
   [OrderStatus.ON_THE_WAY]: OrderStatus.DELIVERED,
   [OrderStatus.DELIVERED]: OrderStatus.CLOSED,
 };
+
+// Статусы, в которых организатор может отменить заказ
+export const CANCELLABLE_FROM: OrderStatus[] = [
+  OrderStatus.COLLECTING,
+  OrderStatus.CONFIRMING,
+  OrderStatus.PREPARING,
+  OrderStatus.ON_THE_WAY,
+  OrderStatus.DELIVERED,
+  OrderStatus.COMPLAINT,
+];
+
+// Статусы, в которых можно открыть претензию
+export const COMPLAINT_FROM: OrderStatus[] = [
+  OrderStatus.CONFIRMING,
+  OrderStatus.PREPARING,
+  OrderStatus.ON_THE_WAY,
+  OrderStatus.DELIVERED,
+];
+
+// Когда заказ в претензии — на какие статусы можно вернуть
+export const COMPLAINT_RESOLUTIONS: OrderStatus[] = [
+  OrderStatus.COLLECTING,
+  OrderStatus.CONFIRMING,
+  OrderStatus.PREPARING,
+  OrderStatus.ON_THE_WAY,
+  OrderStatus.DELIVERED,
+  OrderStatus.CLOSED,
+];

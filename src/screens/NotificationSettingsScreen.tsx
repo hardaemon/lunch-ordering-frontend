@@ -5,6 +5,7 @@ import { profileApi } from '../api/profile';
 import { NotificationPreferences } from '../types/notifications';
 import { toast } from '../utils/toast';
 import { haptics } from '../utils/haptics';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SheetHeader } from '../components/SheetHeader';
 
 const ITEMS: Array<{
@@ -46,6 +47,7 @@ export function NotificationSettingsScreen() {
   const initial = user?.notificationPreferences ?? DEFAULTS;
   const [prefs, setPrefs] = useState<NotificationPreferences>(initial);
   const [busyKey, setBusyKey] = useState<keyof NotificationPreferences | null>(null);
+  const insets = useSafeAreaInsets();
 
   const toggle = async (key: keyof NotificationPreferences) => {
     const newValue = !prefs[key];
@@ -77,8 +79,13 @@ export function NotificationSettingsScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: '#f5f5f7' }}>
-      <SheetHeader title="Уведомления" />
-      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <View style={styles.headerWrap}>
+        <SheetHeader title="Уведомления" />
+      </View>
+      <ScrollView
+        style={styles.scrollAbsolute}
+        contentContainerStyle={styles.content}
+      >
         <Text style={styles.hint}>
           Управляйте тем, какие push-уведомления хотите получать.
         </Text>
@@ -114,4 +121,18 @@ const styles = StyleSheet.create({
   rowDivider: { borderBottomWidth: 1, borderBottomColor: '#f0f0f0' },
   title: { fontSize: 16, fontWeight: '500', marginBottom: 4 },
   description: { color: '#666', fontSize: 13, lineHeight: 18 },
+  headerWrap: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
+  },
+  scrollAbsolute: {
+    position: 'absolute',
+    top: 50,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
 });

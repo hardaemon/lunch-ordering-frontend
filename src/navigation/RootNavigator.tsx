@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, Platform, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as Linking from 'expo-linking';
@@ -53,16 +53,16 @@ const linking = {
   },
 };
 
+const sheetScreenOptions = {
+  headerShown: false,
+  presentation: 'formSheet' as const,
+  sheetAllowedDetents: Platform.OS === 'ios' ? [1] : [0.95],
+  sheetGrabberVisible: true,
+  sheetCornerRadius: 16,
+};
+
 function AuthenticatedApp() {
   usePushNotifications();
-
-  const sheetOptions = {
-    headerShown: false,
-    presentation: 'formSheet' as const,
-    sheetAllowedDetents: [0.95],
-    sheetGrabberVisible: true,
-    sheetCornerRadius: 16,
-  };
 
   return (
     <AppStack.Navigator
@@ -88,27 +88,27 @@ function AuthenticatedApp() {
       <AppStack.Screen
         name="Profile"
         component={ProfileScreen}
-        options={sheetOptions}
+        options={sheetScreenOptions}
       />
       <AppStack.Screen
         name="SavedAddresses"
         component={SavedAddressesScreen}
-        options={sheetOptions}
+        options={sheetScreenOptions}
       />
       <AppStack.Screen
         name="SavedRestaurants"
         component={SavedRestaurantsScreen}
-        options={sheetOptions}
+        options={sheetScreenOptions}
       />
       <AppStack.Screen
         name="NotificationSettings"
         component={NotificationSettingsScreen}
-        options={sheetOptions}
+        options={sheetScreenOptions}
       />
       <AppStack.Screen
         name="ChangePassword"
         component={ChangePasswordScreen}
-        options={sheetOptions}
+        options={sheetScreenOptions}
       />
     </AppStack.Navigator>
   );
