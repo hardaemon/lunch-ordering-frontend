@@ -131,6 +131,19 @@ export function SavedRestaurantsScreen() {
             toast.error('Не удалось', e?.response?.data?.message);
           }
         }}
+        onDelete={
+          editing
+            ? async () => {
+                try {
+                  await remove(editing.id);
+                  haptics.medium();
+                  setModalVisible(false);
+                } catch (e: any) {
+                  toast.error('Не удалось', e?.response?.data?.message);
+                }
+              }
+            : undefined
+        }
       />
     </View>
   );
@@ -141,11 +154,13 @@ function EditRestaurantModal({
   initial,
   onClose,
   onSubmit,
+  onDelete,
 }: {
   visible: boolean;
   initial: SavedRestaurant | null;
   onClose: () => void;
   onSubmit: (data: { name: string; url?: string }) => Promise<void>;
+  onDelete?: () => void;
 }) {
   const [name, setName] = useState('');
   const [url, setUrl] = useState('');
@@ -167,6 +182,14 @@ function EditRestaurantModal({
     } finally {
       setBusy(false);
     }
+  };
+
+  const handleDeletePress = () => {
+    if (!onDelete) return;
+    Alert.alert('Удалить ресторан?', name, [
+      { text: 'Отмена', style: 'cancel' },
+      { text: 'Удалить', style: 'destructive', onPress: onDelete },
+    ]);
   };
 
   return (
@@ -214,6 +237,15 @@ function EditRestaurantModal({
               style={{ flex: 1 }}
             />
           </View>
+          {initial && onDelete && (
+            <TouchableOpacity
+              style={styles.deleteBtn}
+              onPress={handleDeletePress}
+              disabled={busy}
+            >
+              <Text style={styles.deleteBtnText}>Удалить ресторан</Text>
+            </TouchableOpacity>
+          )}
         </Pressable>
       </KeyboardAvoidingView>
       <Toast />
@@ -299,4 +331,15 @@ const styles = StyleSheet.create({
   },
   cancelBtn: { backgroundColor: '#f0f0f0' },
   cancelBtnText: { color: '#000', fontSize: 16, fontWeight: '600' },
+  deleteBtn: {
+    padding: 14,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 50,
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: '#FF3B30',
+  },
+  deleteBtnText: { color: '#FF3B30', fontSize: 16, fontWeight: '600' },
 });
