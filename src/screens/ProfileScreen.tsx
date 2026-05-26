@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import {
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -124,14 +125,16 @@ export function ProfileScreen({ navigation }: Props) {
           <Text style={styles.rowArrow}>›</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.row}
-          onPress={() => navigation.navigate('NotificationSettings')}
-          activeOpacity={0.6}
-        >
-          <Text style={styles.rowText}>Уведомления</Text>
-          <Text style={styles.rowArrow}>›</Text>
-        </TouchableOpacity>
+        {Platform.OS !== 'web' && (
+          <TouchableOpacity
+            style={styles.row}
+            onPress={() => navigation.navigate('NotificationSettings')}
+            activeOpacity={0.6}
+          >
+            <Text style={styles.rowText}>Уведомления</Text>
+            <Text style={styles.rowArrow}>›</Text>
+          </TouchableOpacity>
+        )}
 
         <TouchableOpacity
           style={[styles.row, styles.logoutRow]}

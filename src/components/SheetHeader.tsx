@@ -2,6 +2,9 @@ import React from 'react';
 import { Platform, StyleSheet, Text, View } from 'react-native';
 
 export function SheetHeader({ title }: { title: string }) {
+  if (Platform.OS === 'web') {
+    return null;
+  }
   return (
     <View style={styles.headerBar}>
       <Text style={styles.headerTitle}>{title}</Text>

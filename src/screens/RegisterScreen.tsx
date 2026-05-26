@@ -8,12 +8,20 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  View,
 } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useAuth } from '../auth/AuthContext';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { toast } from '../utils/toast';
 import type { AuthStackParamList } from '../navigation/RootNavigator';
+
+const InteractiveWrap = ({ children, style }: any) => {
+  if (Platform.OS === 'web') {
+    return <View style={style}>{children}</View>;
+  }
+  return <Pressable style={style} onPress={Keyboard.dismiss}>{children}</Pressable>;
+};
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Register'>;
 
@@ -52,7 +60,7 @@ export function RegisterScreen({ navigation }: Props) {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <Pressable style={styles.inner} onPress={Keyboard.dismiss}>
+      <InteractiveWrap style={styles.inner}>
         <Text style={styles.title}>Регистрация</Text>
 
         <TextInput
@@ -96,7 +104,7 @@ export function RegisterScreen({ navigation }: Props) {
         <TouchableOpacity onPress={() => navigation.navigate('Login')}>
           <Text style={styles.link}>Уже есть аккаунт? Войти</Text>
         </TouchableOpacity>
-      </Pressable>
+      </InteractiveWrap>
     </KeyboardAvoidingView>
   );
 }

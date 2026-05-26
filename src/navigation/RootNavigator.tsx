@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActivityIndicator, Platform, View } from 'react-native';
+import { ActivityIndicator, Platform, TouchableOpacity, View, Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as Linking from 'expo-linking';
@@ -15,6 +15,32 @@ import { SavedAddressesScreen } from '../screens/SavedAddressesScreen';
 import { SavedRestaurantsScreen } from '../screens/SavedRestaurantsScreen';
 import { NotificationSettingsScreen } from '../screens/NotificationSettingsScreen';
 import { ChangePasswordScreen } from '../screens/ChangePasswordScreen';
+
+function BackToProfile({ navigation }: any) {
+  if (Platform.OS !== 'web') return null;
+  return (
+    <TouchableOpacity
+      onPress={() => navigation.navigate('Profile')}
+      style={{ paddingHorizontal: 12, paddingVertical: 4 }}
+      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+    >
+      <Text style={{ color: '#007AFF', fontSize: 17 }}>‹ Назад</Text>
+    </TouchableOpacity>
+  );
+}
+
+function BackToOrders({ navigation }: any) {
+  if (Platform.OS !== 'web') return null;
+  return (
+    <TouchableOpacity
+      onPress={() => navigation.navigate('OrdersList')}
+      style={{ paddingHorizontal: 12, paddingVertical: 4 }}
+      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+    >
+      <Text style={{ color: '#007AFF', fontSize: 17 }}>‹ Назад</Text>
+    </TouchableOpacity>
+  );
+}
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -53,13 +79,20 @@ const linking = {
   },
 };
 
-const sheetScreenOptions = {
-  headerShown: false,
-  presentation: 'formSheet' as const,
-  sheetAllowedDetents: Platform.OS === 'ios' ? [1] : [0.95],
-  sheetGrabberVisible: true,
-  sheetCornerRadius: 16,
-};
+const sheetScreenOptions = Platform.OS === 'web'
+  ? {
+      headerShown: true,
+      headerTitleAlign: 'center' as const,
+      headerBackVisible: false,
+      headerLeft: () => null,
+    }
+  : {
+      headerShown: false,
+      presentation: 'formSheet' as const,
+      sheetAllowedDetents: Platform.OS === 'ios' ? [1] : [0.95],
+      sheetGrabberVisible: true,
+      sheetCornerRadius: 16,
+    };
 
 function AuthenticatedApp() {
   usePushNotifications();
@@ -89,27 +122,47 @@ function AuthenticatedApp() {
       <AppStack.Screen
         name="Profile"
         component={ProfileScreen}
-        options={sheetScreenOptions}
+        options={({ navigation }) => ({
+          ...sheetScreenOptions,
+          title: 'Профиль',
+          headerLeft: () => <BackToOrders navigation={navigation} />,
+        })}
       />
       <AppStack.Screen
         name="SavedAddresses"
         component={SavedAddressesScreen}
-        options={sheetScreenOptions}
+        options={({ navigation }) => ({
+          ...sheetScreenOptions,
+          title: 'Сохранённые адреса',
+          headerLeft: () => <BackToProfile navigation={navigation} />,
+        })}
       />
       <AppStack.Screen
         name="SavedRestaurants"
         component={SavedRestaurantsScreen}
-        options={sheetScreenOptions}
+        options={({ navigation }) => ({
+          ...sheetScreenOptions,
+          title: 'Сохранённые рестораны',
+          headerLeft: () => <BackToProfile navigation={navigation} />,
+        })}
       />
       <AppStack.Screen
         name="NotificationSettings"
         component={NotificationSettingsScreen}
-        options={sheetScreenOptions}
+        options={({ navigation }) => ({
+          ...sheetScreenOptions,
+          title: 'Уведомления',
+          headerLeft: () => <BackToProfile navigation={navigation} />,
+        })}
       />
       <AppStack.Screen
         name="ChangePassword"
         component={ChangePasswordScreen}
-        options={sheetScreenOptions}
+        options={({ navigation }) => ({
+          ...sheetScreenOptions,
+          title: 'Смена пароля',
+          headerLeft: () => <BackToProfile navigation={navigation} />,
+        })}
       />
     </AppStack.Navigator>
   );

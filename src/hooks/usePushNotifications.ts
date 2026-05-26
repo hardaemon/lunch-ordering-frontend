@@ -58,6 +58,10 @@ export function usePushNotifications() {
 }
 
 async function registerForPushNotificationsAsync(): Promise<string | null> {
+    if (Platform.OS === 'web') {
+    return null;
+  }
+
   if (!Device.isDevice) {
     console.warn('Push notifications work only on physical devices');
     return null;
