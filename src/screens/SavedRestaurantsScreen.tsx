@@ -72,30 +72,10 @@ export function SavedRestaurantsScreen() {
       <View style={styles.headerWrap}>
         <SheetHeader title="Сохранённые рестораны" />
       </View>
-      <FlatList
-        style={styles.listAbsolute}
-        data={items}
-        keyExtractor={(i) => i.id}
-        contentContainerStyle={isEmpty ? styles.listEmpty : styles.list}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.row}
-            onPress={() => openEdit(item)}
-            onLongPress={() => handleDelete(item)}
-            activeOpacity={0.7}
-          >
-            <View style={{ flex: 1 }}>
-              <Text style={styles.name}>{item.name}</Text>
-              {item.url && (
-                <Text style={styles.url} numberOfLines={1}>
-                  {item.url}
-                </Text>
-              )}
-            </View>
-          </TouchableOpacity>
-        )}
-        ListEmptyComponent={
-          isLoading ? null : (
+
+      <View style={styles.contentArea}>
+        {isLoading ? null : isEmpty ? (
+          <View style={styles.emptyWrap}>
             <EmptyState
               icon="🍽️"
               title="Ресторанов пока нет"
@@ -103,9 +83,33 @@ export function SavedRestaurantsScreen() {
               ctaTitle="Добавить ресторан"
               onCtaPress={openCreate}
             />
-          )
-        }
-      />
+          </View>
+        ) : (
+          <FlatList
+            data={items}
+            keyExtractor={(i) => i.id}
+            contentContainerStyle={styles.list}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.row}
+                onPress={() => openEdit(item)}
+                onLongPress={() => handleDelete(item)}
+                activeOpacity={0.7}
+              >
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.name}>{item.name}</Text>
+                  {item.url && (
+                    <Text style={styles.url} numberOfLines={1}>
+                      {item.url}
+                    </Text>
+                  )}
+                </View>
+              </TouchableOpacity>
+            )}
+          />
+        )}
+      </View>
+
       <TouchableOpacity
         style={[styles.fab, { bottom: insets.bottom + 20 }]}
         onPress={() => {
@@ -247,14 +251,18 @@ function EditRestaurantModal({
             </TouchableOpacity>
           )}
         </Pressable>
+        <Toast />
       </KeyboardAvoidingView>
-      <Toast />
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f5f7' },
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f7',
+    minHeight: '100%',
+  },
   headerWrap: {
     position: 'absolute',
     top: 0,
@@ -262,25 +270,17 @@ const styles = StyleSheet.create({
     right: 0,
     zIndex: 10,
   },
-  listAbsolute: {
-    position: 'absolute',
-    top: 50,
-    left: 0,
-    right: 0,
-    bottom: 0,
+  contentArea: {
+    flex: 1,
+    paddingTop: 50,
+    minHeight: '100%',
   },
-  list: {
-    padding: 16,
-    paddingTop: 22,
-    paddingBottom: 100,
-  },
-  listEmpty: {
-    flexGrow: 1,
+  emptyWrap: {
+    flex: 1,
     alignItems: 'center',
-    padding: 16,
-    paddingTop: 86,
-    paddingBottom: 100,
+    paddingTop: 80,
   },
+  list: { padding: 16, paddingTop: 22, paddingBottom: 120 },
   row: { backgroundColor: '#fff', padding: 14, borderRadius: 10, marginBottom: 8 },
   name: { fontSize: 16, fontWeight: '600', color: '#000' },
   url: { fontSize: 13, color: '#007AFF', marginTop: 4 },
@@ -293,8 +293,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#007AFF',
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 20,
-    elevation: 6,
+    zIndex: 100,
+    elevation: 8,
     shadowColor: '#000',
     shadowOpacity: 0.2,
     shadowRadius: 8,

@@ -100,19 +100,20 @@ export function OrderRoomScreen({ route }: Props) {
   };
 
   const handleShareInvite = async () => {
-    try {
-      const link = `grouporder://order/${order.id}`;
-      await Share.share({
-        message:
-          `Присоединяйся к заказу из ${order.restaurantName}!\n\n` +
-          `Открой ссылку в приложении: ${link}`,
-        title: `Заказ из ${order.restaurantName}`,
-      });
-      haptics.light();
-    } catch (e: any) {
-      toast.error('Не удалось поделиться');
-    }
-  };
+  try {
+    const apiUrl = process.env.EXPO_PUBLIC_API_URL || '';
+    const baseUrl = apiUrl.replace(/\/api\/?$/, '');
+    const inviteLink = `${baseUrl}/api/orders/invite/${order.id}`;
+    await Share.share({
+      message:
+        `Присоединяйся к заказу из ${order.restaurantName}!\n\n${inviteLink}`,
+      title: `Заказ из ${order.restaurantName}`,
+    });
+    haptics.light();
+  } catch (e: any) {
+    toast.error('Не удалось поделиться');
+  }
+};
 
   const handleAdvanceStatus = async () => {
     const next = NEXT_STATUS[order.status];
