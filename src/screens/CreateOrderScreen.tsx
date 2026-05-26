@@ -119,6 +119,16 @@ export function CreateOrderScreen({ navigation }: Props) {
       keyboardDismissMode="on-drag"
     >
       <View style={styles.form}>
+        <Text style={styles.label}>Ресторан *</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Sushi Place"
+          placeholderTextColor="#999"
+          value={restaurantName}
+          onChangeText={setRestaurantName}
+          editable={!busy}
+        />
+
         {savedRestaurants.length > 0 && (
           <View style={styles.chipsBlock}>
             <Text style={styles.chipsLabel}>Из сохранённых:</Text>
@@ -143,16 +153,6 @@ export function CreateOrderScreen({ navigation }: Props) {
           </View>
         )}
 
-        <Text style={styles.label}>Ресторан *</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Sushi Place"
-          placeholderTextColor="#999"
-          value={restaurantName}
-          onChangeText={setRestaurantName}
-          editable={!busy}
-        />
-
         <Text style={styles.label}>Ссылка на меню</Text>
         <TextInput
           style={styles.input}
@@ -163,6 +163,16 @@ export function CreateOrderScreen({ navigation }: Props) {
           keyboardType="url"
           value={restaurantUrl}
           onChangeText={setRestaurantUrl}
+          editable={!busy}
+        />
+
+        <Text style={styles.label}>Адрес доставки *</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="ул. Ленина, 1"
+          placeholderTextColor="#999"
+          value={deliveryAddress}
+          onChangeText={setDeliveryAddress}
           editable={!busy}
         />
 
@@ -186,16 +196,6 @@ export function CreateOrderScreen({ navigation }: Props) {
             </ScrollView>
           </View>
         )}
-
-        <Text style={styles.label}>Адрес доставки *</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="ул. Ленина, 1"
-          placeholderTextColor="#999"
-          value={deliveryAddress}
-          onChangeText={setDeliveryAddress}
-          editable={!busy}
-        />
 
         <Text style={styles.label}>Стоимость доставки</Text>
         <TextInput

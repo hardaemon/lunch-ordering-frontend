@@ -44,6 +44,7 @@ import { toast } from '../utils/toast';
 import { haptics } from '../utils/haptics';
 import type { AppStackParamList } from '../navigation/RootNavigator';
 import Toast from 'react-native-toast-message';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type Props = NativeStackScreenProps<AppStackParamList, 'OrderRoom'>;
 
@@ -51,7 +52,7 @@ export function OrderRoomScreen({ route }: Props) {
   const { orderId } = route.params;
   const { user } = useAuth();
   const { order, isLoading, error, reload } = useOrderRoom(orderId);
-
+  const insets = useSafeAreaInsets();
   const [addModalVisible, setAddModalVisible] = useState(false);
   const [statusModalVisible, setStatusModalVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -423,7 +424,7 @@ export function OrderRoomScreen({ route }: Props) {
 
       {canEdit && isParticipant && (
         <TouchableOpacity
-          style={styles.fab}
+          style={[styles.fab, { bottom: insets.bottom + 20 }]}
           onPress={() => {
             haptics.light();
             setAddModalVisible(true);
@@ -490,7 +491,7 @@ function ItemRow({
     >
       <View style={styles.itemRow}>
         <View style={{ flex: 1 }}>
-          <Text style={[styles.itemName, item.isOrdered && styles.itemOrdered]}>
+          <Text style={[styles.itemName, isOwner && item.isOrdered && styles.itemOrdered]}>
             {item.name}
           </Text>
           <Text style={styles.itemMeta}>
@@ -567,7 +568,13 @@ function ParticipantsBlock({
                     style={styles.confirmBtn}
                     onPress={() => onConfirmPayment(p.userId)}
                   >
-                    <Text style={styles.confirmBtnText}>Подтвердить</Text>
+                    <Text
+                      style={styles.confirmBtnText}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                    >
+                      Подтвердить оплату
+                    </Text>
                   </TouchableOpacity>
                 )
               ) : (
@@ -694,7 +701,8 @@ function AddItemModal({
     >
       <KeyboardAvoidingView
         style={styles.modalOverlay}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
         <Pressable style={styles.modalBackdrop} onPress={onClose} />
         <Pressable style={styles.modal} onPress={Keyboard.dismiss}>
@@ -843,7 +851,6 @@ const styles = StyleSheet.create({
   fab: {
     position: 'absolute',
     right: 20,
-    bottom: 30,
     width: 60,
     height: 60,
     borderRadius: 30,
