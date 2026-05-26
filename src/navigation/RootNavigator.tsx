@@ -36,7 +36,7 @@ const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 const AppStack = createNativeStackNavigator<AppStackParamList>();
 
 const linking = {
-  prefixes: [Linking.createURL('/'), 'grouporder://'],
+  prefixes: [Linking.createURL('/'), 'lunchordering://'],
   config: {
     screens: {
       OrdersList: 'orders',
