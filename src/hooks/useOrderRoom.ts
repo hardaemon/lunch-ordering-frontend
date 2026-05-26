@@ -29,10 +29,22 @@ export function useOrderRoom(orderId: string) {
     isConnected: false,
   });
   const socketRef = useRef<Socket | null>(null);
+  const hasJoinedRef = useRef(false);
 
   // Перезагрузка заказа полностью (после реконнекта или вручную)
   const reload = useCallback(async () => {
     try {
+      // При первой загрузке пробуем присоединиться к заказу.
+      // Если уже участник — backend идемпотентно вернёт текущий заказ.
+      // Если заказ уже не в COLLECTING — будет ошибка, тихо проглатываем.
+      if (!hasJoinedRef.current) {
+        try {
+          await ordersApi.join(orderId);
+        } catch {
+          // не падаем — попробуем загрузить заказ ниже
+        }
+        hasJoinedRef.current = true;
+      }
       const order = await ordersApi.getOne(orderId);
       setState((s) => ({ ...s, order, isLoading: false, error: null }));
     } catch (e: any) {
