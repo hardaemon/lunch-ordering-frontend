@@ -68,6 +68,7 @@ function AuthenticatedApp() {
     <AppStack.Navigator
       screenOptions={{
         headerBackButtonDisplayMode: 'minimal',
+        headerTitleAlign: 'center',
       }}
     >
       <AppStack.Screen

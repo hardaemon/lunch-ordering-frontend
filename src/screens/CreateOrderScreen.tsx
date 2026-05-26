@@ -19,6 +19,8 @@ import { PrimaryButton } from '../components/PrimaryButton';
 import { toast } from '../utils/toast';
 import { haptics } from '../utils/haptics';
 import type { AppStackParamList } from '../navigation/RootNavigator';
+import { formatDateTime } from '../utils/formatters';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type Props = NativeStackScreenProps<AppStackParamList, 'CreateOrder'>;
 
@@ -28,10 +30,14 @@ export function CreateOrderScreen({ navigation }: Props) {
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [deliveryCost, setDeliveryCost] = useState('0');
   const [freeThreshold, setFreeThreshold] = useState('');
-  const [deadline, setDeadline] = useState(new Date(Date.now() + 30 * 60 * 1000));
+  const [deadline, setDeadline] = useState(() => {
+    const d = new Date(Date.now() + 30 * 60 * 1000);
+    d.setSeconds(0, 0);
+    return d;
+  });
   const [showIosPicker, setShowIosPicker] = useState(false);
   const [busy, setBusy] = useState(false);
-
+  const insets = useSafeAreaInsets();
   const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
   const [savedRestaurants, setSavedRestaurants] = useState<SavedRestaurant[]>([]);
 
@@ -102,6 +108,7 @@ export function CreateOrderScreen({ navigation }: Props) {
               const combined = new Date(selectedDate);
               combined.setHours(selectedTime.getHours());
               combined.setMinutes(selectedTime.getMinutes());
+              combined.setSeconds(0, 0);
               setDeadline(combined);
             },
           });
@@ -115,6 +122,7 @@ export function CreateOrderScreen({ navigation }: Props) {
   return (
     <ScrollView
       style={styles.container}
+      contentContainerStyle={{ paddingBottom: insets.bottom + 40 }}
       keyboardShouldPersistTaps="handled"
       keyboardDismissMode="on-drag"
     >
@@ -225,15 +233,7 @@ export function CreateOrderScreen({ navigation }: Props) {
           onPress={openDeadlinePicker}
           disabled={busy}
         >
-          <Text style={{ color: '#000' }}>
-            {deadline.toLocaleString('ru-RU', {
-              day: '2-digit',
-              month: '2-digit',
-              year: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit',
-            })}
-          </Text>
+          <Text style={{ color: '#000' }}>{formatDateTime(deadline)}</Text>
         </TouchableOpacity>
 
         {showIosPicker && Platform.OS === 'ios' && (
@@ -242,7 +242,11 @@ export function CreateOrderScreen({ navigation }: Props) {
             mode="datetime"
             display="spinner"
             onChange={(_, selected) => {
-              if (selected) setDeadline(selected);
+              if (selected) {
+                const cleaned = new Date(selected);
+                cleaned.setSeconds(0, 0);
+                setDeadline(cleaned);
+              }
             }}
             minimumDate={new Date()}
           />

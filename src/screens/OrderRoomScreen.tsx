@@ -45,6 +45,7 @@ import { haptics } from '../utils/haptics';
 import type { AppStackParamList } from '../navigation/RootNavigator';
 import Toast from 'react-native-toast-message';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { formatDateTime } from '../utils/formatters';
 
 type Props = NativeStackScreenProps<AppStackParamList, 'OrderRoom'>;
 
@@ -54,6 +55,7 @@ export function OrderRoomScreen({ route }: Props) {
   const { order, isLoading, error, reload } = useOrderRoom(orderId);
   const insets = useSafeAreaInsets();
   const [addModalVisible, setAddModalVisible] = useState(false);
+  const [editingItem, setEditingItem] = useState<OrderItemType | null>(null);
   const [statusModalVisible, setStatusModalVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -93,6 +95,11 @@ export function OrderRoomScreen({ route }: Props) {
   const showCancel = isOwner && CANCELLABLE_FROM.includes(order.status);
   const showComplaint = isOwner && COMPLAINT_FROM.includes(order.status);
   const showChangeStatus = isOwner && order.status === OrderStatus.COMPLAINT;
+
+  const handleEditItem = (item: OrderItemType) => {
+    setEditingItem(item);
+    setAddModalVisible(true);
+  };
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -241,6 +248,7 @@ export function OrderRoomScreen({ route }: Props) {
             canEdit={canEdit}
             onToggleOrdered={() => handleToggleOrdered(item)}
             onDelete={() => handleDeleteItem(item)}
+            onEdit={() => handleEditItem(item)}
           />
         )}
         refreshControl={
@@ -266,7 +274,7 @@ export function OrderRoomScreen({ route }: Props) {
               <Text style={styles.title}>{order.restaurantName}</Text>
               <Text style={styles.subtitle}>{order.deliveryAddress}</Text>
               <Text style={styles.meta}>
-                Дедлайн: {new Date(order.deadlineAt).toLocaleString('ru-RU')}
+                Дедлайн: {formatDateTime(order.deadlineAt)}
               </Text>
               {parseMoney(order.deliveryCost) > 0 && (
                 <Text style={styles.meta}>
@@ -383,7 +391,7 @@ export function OrderRoomScreen({ route }: Props) {
               )}
             </View>
 
-            {isParticipant && me && !me.hasPaid && mySubtotal > 0 && (
+            {!isOwner && isParticipant && me && !me.hasPaid && mySubtotal > 0 && (
               <PrimaryButton
                 title="Я перевёл деньги"
                 onPress={handleMarkPaid}
@@ -391,7 +399,7 @@ export function OrderRoomScreen({ route }: Props) {
                 style={{ marginBottom: 12 }}
               />
             )}
-            {me?.hasPaid && (
+            {me?.hasPaid && !isOwner && (
               <View style={styles.paidBadge}>
                 <Text style={styles.paidText}>
                   ✓ Оплата отмечена
@@ -427,6 +435,7 @@ export function OrderRoomScreen({ route }: Props) {
           style={[styles.fab, { bottom: insets.bottom + 20 }]}
           onPress={() => {
             haptics.light();
+            setEditingItem(null);
             setAddModalVisible(true);
           }}
           activeOpacity={0.8}
@@ -437,7 +446,11 @@ export function OrderRoomScreen({ route }: Props) {
 
       <AddItemModal
         visible={addModalVisible}
-        onClose={() => setAddModalVisible(false)}
+        initial={editingItem}
+        onClose={() => {
+          setAddModalVisible(false);
+          setEditingItem(null);
+        }}
         orderId={order.id}
       />
 
@@ -473,6 +486,7 @@ function ItemRow({
   canEdit,
   onToggleOrdered,
   onDelete,
+  onEdit,
 }: {
   item: OrderItemType;
   isOwner: boolean;
@@ -480,8 +494,11 @@ function ItemRow({
   canEdit: boolean;
   onToggleOrdered: () => void;
   onDelete: () => void;
+  onEdit: () => void;
 }) {
   const subtotal = itemSubtotal(item);
+  const editable = canEdit && isMine;
+
   return (
     <Animated.View
       entering={FadeIn.duration(250)}
@@ -489,7 +506,12 @@ function ItemRow({
       layout={LinearTransition.springify()}
       style={styles.itemCard}
     >
-      <View style={styles.itemRow}>
+      <TouchableOpacity
+        style={styles.itemRow}
+        onPress={editable ? onEdit : undefined}
+        activeOpacity={editable ? 0.7 : 1}
+        disabled={!editable}
+      >
         <View style={{ flex: 1 }}>
           <Text style={[styles.itemName, isOwner && item.isOrdered && styles.itemOrdered]}>
             {item.name}
@@ -506,25 +528,29 @@ function ItemRow({
           {isOwner && (
             <TouchableOpacity
               style={[styles.tickBtn, item.isOrdered && styles.tickBtnActive]}
-              onPress={onToggleOrdered}
+              onPress={(e) => {
+                e.stopPropagation?.();
+                onToggleOrdered();
+              }}
             >
-              <Text
-                style={[
-                  styles.tickText,
-                  item.isOrdered && styles.tickTextActive,
-                ]}
-              >
+              <Text style={[styles.tickText, item.isOrdered && styles.tickTextActive]}>
                 ✓
               </Text>
             </TouchableOpacity>
           )}
           {(isMine || isOwner) && canEdit && (
-            <TouchableOpacity onPress={onDelete} style={styles.deleteBtn}>
+            <TouchableOpacity
+              onPress={(e) => {
+                e.stopPropagation?.();
+                onDelete();
+              }}
+              style={styles.deleteBtn}
+            >
               <Text style={styles.deleteText}>×</Text>
             </TouchableOpacity>
           )}
         </View>
-      </View>
+      </TouchableOpacity>
     </Animated.View>
   );
 }
@@ -644,10 +670,12 @@ function ChangeStatusModal({
 
 function AddItemModal({
   visible,
+  initial,
   onClose,
   orderId,
 }: {
   visible: boolean;
+  initial: OrderItemType | null;
   onClose: () => void;
   orderId: string;
 }) {
@@ -656,11 +684,17 @@ function AddItemModal({
   const [quantity, setQuantity] = useState('1');
   const [busy, setBusy] = useState(false);
 
-  const reset = () => {
-    setName('');
-    setPrice('');
-    setQuantity('1');
-  };
+  React.useEffect(() => {
+    if (initial) {
+      setName(initial.name);
+      setPrice(String(parseMoney(initial.pricePerUnit)));
+      setQuantity(String(initial.quantity));
+    } else {
+      setName('');
+      setPrice('');
+      setQuantity('1');
+    }
+  }, [initial, visible]);
 
   const submit = async () => {
     const priceNum = parseFloat(price.replace(',', '.'));
@@ -677,13 +711,20 @@ function AddItemModal({
     }
     setBusy(true);
     try {
-      await ordersApi.addItem(orderId, {
-        name: name.trim(),
-        pricePerUnit: priceNum,
-        quantity: qtyNum,
-      });
+      if (initial) {
+        await ordersApi.updateItem(initial.id, {
+          name: name.trim(),
+          pricePerUnit: priceNum,
+          quantity: qtyNum,
+        });
+      } else {
+        await ordersApi.addItem(orderId, {
+          name: name.trim(),
+          pricePerUnit: priceNum,
+          quantity: qtyNum,
+        });
+      }
       haptics.light();
-      reset();
       onClose();
     } catch (e: any) {
       toast.error('Не удалось', e?.response?.data?.message);
@@ -702,11 +743,12 @@ function AddItemModal({
       <KeyboardAvoidingView
         style={styles.modalOverlay}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
         <Pressable style={styles.modalBackdrop} onPress={onClose} />
         <Pressable style={styles.modal} onPress={Keyboard.dismiss}>
-          <Text style={styles.modalTitle}>Добавить позицию</Text>
+          <Text style={styles.modalTitle}>
+            {initial ? 'Изменить позицию' : 'Добавить позицию'}
+          </Text>
           <TextInput
             style={styles.input}
             placeholder="Название"
@@ -736,21 +778,21 @@ function AddItemModal({
           <View style={styles.modalActions}>
             <TouchableOpacity
               style={[styles.modalBtn, styles.cancelBtn]}
-              onPress={() => {
-                reset();
-                onClose();
-              }}
+              onPress={onClose}
               disabled={busy}
             >
               <Text style={styles.cancelBtnText}>Отмена</Text>
             </TouchableOpacity>
-            <View style={{ flex: 1 }}>
-              <PrimaryButton title="Добавить" onPress={submit} busy={busy} />
-            </View>
+            <PrimaryButton
+              title={initial ? 'Сохранить' : 'Добавить'}
+              onPress={submit}
+              busy={busy}
+              style={{ flex: 1 }}
+            />
           </View>
         </Pressable>
+        <Toast />
       </KeyboardAvoidingView>
-      <Toast />
     </Modal>
   );
 }
@@ -883,10 +925,17 @@ const styles = StyleSheet.create({
     color: '#000',
     backgroundColor: '#fff',
   },
-  modalActions: { flexDirection: 'row', gap: 8, marginTop: 8 },
-  modalBtn: { flex: 1, padding: 14, borderRadius: 8, alignItems: 'center' },
+  modalActions: { flexDirection: 'row', gap: 8 },
+  modalBtn: {
+    flex: 1,
+    padding: 14,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 50,
+  },
   cancelBtn: { backgroundColor: '#f0f0f0' },
-  cancelBtnText: { color: '#333', fontWeight: '600' },
+  cancelBtnText: { color: '#000', fontSize: 16, fontWeight: '600' },
   statusOption: {
     flexDirection: 'row',
     alignItems: 'center',
