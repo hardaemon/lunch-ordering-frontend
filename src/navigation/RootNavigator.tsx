@@ -112,12 +112,26 @@ function AuthenticatedApp() {
       <AppStack.Screen
         name="CreateOrder"
         component={CreateOrderScreen}
-        options={{ title: 'Новый заказ' }}
+        options={({ navigation }) => ({
+          title: 'Новый заказ',
+          headerLeft:
+            Platform.OS === 'web'
+              ? () => <BackToOrders navigation={navigation} />
+              : undefined,
+          headerBackVisible: Platform.OS !== 'web',
+        })}
       />
       <AppStack.Screen
         name="OrderRoom"
         component={OrderRoomScreen}
-        options={{ title: 'Заказ' }}
+        options={({ navigation }) => ({
+          title: 'Заказ',
+          headerLeft:
+            Platform.OS === 'web'
+              ? () => <BackToOrders navigation={navigation} />
+              : undefined,
+          headerBackVisible: Platform.OS !== 'web',
+        })}
       />
       <AppStack.Screen
         name="Profile"

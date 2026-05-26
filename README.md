@@ -9,6 +9,7 @@ cd mobile
 npx expo install react-native-screens react-native-safe-area-context expo-secure-store @react-native-community/datetimepicker expo-clipboard expo-linking expo-notifications expo-device expo-haptics react-dom react-native-web @expo/metro-runtime
 npm install @react-navigation/native @react-navigation/native-stack axios socket.io-client react-native-toast-message react-native-reanimated@~4.1.0 react-native-worklets@0.5.1
 npm install babel-preset-expo@~54.0.10 --save-dev
+npm run build:web
 ```
 
 Скачайте данные файлы и загрузите их в папку mobile (с заменой файлов)
