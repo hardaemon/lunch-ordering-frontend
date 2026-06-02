@@ -1,8 +1,6 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import {
-  Alert,
   FlatList,
-  Keyboard,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -47,6 +45,7 @@ import Toast from 'react-native-toast-message';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { formatDateTime } from '../utils/formatters';
 import { ModalContent } from '../components/ModalContent';
+import { confirm } from '../utils/confirm';
 
 type Props = NativeStackScreenProps<AppStackParamList, 'OrderRoom'>;
 
@@ -162,7 +161,7 @@ export function OrderRoomScreen({ route }: Props) {
   };
 
   const handleOpenComplaint = () => {
-    Alert.alert(
+    confirm(
       'Открыть претензии?',
       'Заказ перейдёт в статус «Претензии». Из него можно вернуть на любой этап или отменить.',
       [
@@ -186,7 +185,7 @@ export function OrderRoomScreen({ route }: Props) {
   };
 
   const handleCancelOrder = () => {
-    Alert.alert('Отменить заказ?', 'Это действие нельзя отменить.', [
+    confirm('Отменить заказ?', 'Это действие нельзя отменить.', [
       { text: 'Не отменять', style: 'cancel' },
       {
         text: 'Отменить заказ',
@@ -225,7 +224,7 @@ export function OrderRoomScreen({ route }: Props) {
   };
 
   const handleDeleteItem = async (item: OrderItemType) => {
-    Alert.alert('Удалить позицию?', item.name, [
+    confirm('Удалить позицию?', item.name, [
       { text: 'Отмена', style: 'cancel' },
       {
         text: 'Удалить',

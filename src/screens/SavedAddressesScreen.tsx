@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import {
-  Alert,
   FlatList,
-  Keyboard,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -24,6 +22,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SheetHeader } from '../components/SheetHeader';
 import Toast from 'react-native-toast-message';
 import { ModalContent } from '../components/ModalContent';
+import { confirm } from '../utils/confirm';
 
 const addressApi = {
   list: savedApi.listAddresses,
@@ -48,7 +47,7 @@ export function SavedAddressesScreen() {
   };
 
   const handleDelete = (a: SavedAddress) => {
-    Alert.alert('Удалить адрес?', a.label, [
+    confirm('Удалить адрес?', a.label, [
       { text: 'Отмена', style: 'cancel' },
       {
         text: 'Удалить',
@@ -186,7 +185,7 @@ function EditAddressModal({
 
   const handleDeletePress = () => {
     if (!onDelete) return;
-    Alert.alert('Удалить адрес?', label, [
+    confirm('Удалить адрес?', label, [
       { text: 'Отмена', style: 'cancel' },
       { text: 'Удалить', style: 'destructive', onPress: onDelete },
     ]);

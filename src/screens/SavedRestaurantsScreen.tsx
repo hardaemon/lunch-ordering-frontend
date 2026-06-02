@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import {
-  Alert,
   FlatList,
-  Keyboard,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -24,6 +22,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SheetHeader } from '../components/SheetHeader';
 import Toast from 'react-native-toast-message';
 import { ModalContent } from '../components/ModalContent';
+import { confirm } from '../utils/confirm';
 
 const restaurantApi = {
   list: savedApi.listRestaurants,
@@ -49,7 +48,7 @@ export function SavedRestaurantsScreen() {
   };
 
   const handleDelete = (r: SavedRestaurant) => {
-    Alert.alert('Удалить ресторан?', r.name, [
+    confirm('Удалить ресторан?', r.name, [
       { text: 'Отмена', style: 'cancel' },
       {
         text: 'Удалить',
@@ -191,7 +190,7 @@ function EditRestaurantModal({
 
   const handleDeletePress = () => {
     if (!onDelete) return;
-    Alert.alert('Удалить ресторан?', name, [
+    confirm('Удалить ресторан?', name, [
       { text: 'Отмена', style: 'cancel' },
       { text: 'Удалить', style: 'destructive', onPress: onDelete },
     ]);
