@@ -21,7 +21,7 @@ EXPO_PUBLIC_API_URL=http://ВАШ_IP_АДРЕС:3000/api
 
 ## Запуск
 
-В папке mobile выполните команду `npx expo start`
+В папке mobile выполните команду `npx expo start` (android и ios) или `npx expo start --web` (web)
 
 ## Сборка .apk
 

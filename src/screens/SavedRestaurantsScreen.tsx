@@ -23,6 +23,7 @@ import { haptics } from '../utils/haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SheetHeader } from '../components/SheetHeader';
 import Toast from 'react-native-toast-message';
+import { ModalContent } from '../components/ModalContent';
 
 const restaurantApi = {
   list: savedApi.listRestaurants,
@@ -203,7 +204,7 @@ function EditRestaurantModal({
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <Pressable style={styles.modalBackdrop} onPress={onClose} />
-        <Pressable style={styles.modal} onPress={Keyboard.dismiss}>
+        <ModalContent style={styles.modal}>
           <Text style={styles.modalTitle}>
             {initial ? 'Изменить ресторан' : 'Новый ресторан'}
           </Text>
@@ -250,7 +251,7 @@ function EditRestaurantModal({
               <Text style={styles.deleteBtnText}>Удалить ресторан</Text>
             </TouchableOpacity>
           )}
-        </Pressable>
+        </ModalContent>
         <Toast />
       </KeyboardAvoidingView>
     </Modal>

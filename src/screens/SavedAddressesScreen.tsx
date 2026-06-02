@@ -23,6 +23,7 @@ import { haptics } from '../utils/haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SheetHeader } from '../components/SheetHeader';
 import Toast from 'react-native-toast-message';
+import { ModalContent } from '../components/ModalContent';
 
 const addressApi = {
   list: savedApi.listAddresses,
@@ -198,7 +199,7 @@ function EditAddressModal({
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <Pressable style={styles.modalBackdrop} onPress={onClose} />
-        <Pressable style={styles.modal} onPress={Keyboard.dismiss}>
+        <ModalContent style={styles.modal}>
           <Text style={styles.modalTitle}>
             {initial ? 'Изменить адрес' : 'Новый адрес'}
           </Text>
@@ -242,7 +243,7 @@ function EditAddressModal({
               <Text style={styles.deleteBtnText}>Удалить адрес</Text>
             </TouchableOpacity>
           )}
-        </Pressable>
+        </ModalContent>
         <Toast />
       </KeyboardAvoidingView>
     </Modal>

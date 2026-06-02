@@ -46,6 +46,7 @@ import type { AppStackParamList } from '../navigation/RootNavigator';
 import Toast from 'react-native-toast-message';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { formatDateTime } from '../utils/formatters';
+import { ModalContent } from '../components/ModalContent';
 
 type Props = NativeStackScreenProps<AppStackParamList, 'OrderRoom'>;
 
@@ -770,7 +771,7 @@ function AddItemModal({
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <Pressable style={styles.modalBackdrop} onPress={onClose} />
-        <Pressable style={styles.modal} onPress={Keyboard.dismiss}>
+        <ModalContent style={styles.modal}>
           <Text style={styles.modalTitle}>
             {initial ? 'Изменить позицию' : 'Добавить позицию'}
           </Text>
@@ -815,7 +816,7 @@ function AddItemModal({
               style={{ flex: 1 }}
             />
           </View>
-        </Pressable>
+        </ModalContent>
         <Toast />
       </KeyboardAvoidingView>
     </Modal>
