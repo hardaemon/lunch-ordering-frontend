@@ -32,7 +32,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // При старте приложения: если есть сохранённый токен — пробуем получить юзера
   useEffect(() => {
     (async () => {
       try {
@@ -41,7 +40,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const { data } = await api.get<User>('/auth/me');
         setUser(data);
       } catch {
-        // Токен невалидный/протух — чистим
         await tokenStorage.clear();
       } finally {
         setIsLoading(false);

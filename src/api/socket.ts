@@ -1,7 +1,6 @@
 import { io, Socket } from 'socket.io-client';
 import { tokenStorage } from '../auth/storage';
 
-// socket.io без /api
 const SOCKET_URL = (process.env.EXPO_PUBLIC_API_URL || '').replace(/\/api\/?$/, '');
 
 let socket: Socket | null = null;

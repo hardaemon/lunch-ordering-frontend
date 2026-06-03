@@ -31,17 +31,12 @@ export function useOrderRoom(orderId: string) {
   const socketRef = useRef<Socket | null>(null);
   const hasJoinedRef = useRef(false);
 
-  // Перезагрузка заказа полностью (после реконнекта или вручную)
   const reload = useCallback(async () => {
     try {
-      // При первой загрузке пробуем присоединиться к заказу.
-      // Если уже участник — backend идемпотентно вернёт текущий заказ.
-      // Если заказ уже не в COLLECTING — будет ошибка, тихо проглатываем.
       if (!hasJoinedRef.current) {
         try {
           await ordersApi.join(orderId);
         } catch {
-          // не падаем — попробуем загрузить заказ ниже
         }
         hasJoinedRef.current = true;
       }
@@ -78,7 +73,6 @@ export function useOrderRoom(orderId: string) {
       const onConnect = () => {
         setState((s) => ({ ...s, isConnected: true }));
         subscribe();
-        // На случай пропущенных событий — перезагружаем
         reload();
       };
 
@@ -163,13 +157,11 @@ export function useOrderRoom(orderId: string) {
       socket.on(EVENTS.PAYMENT_MARKED, onPaymentChanged);
       socket.on(EVENTS.PAYMENT_CONFIRMED, onPaymentChanged);
 
-      // Если уже подключены — подписываемся сразу
       if (socket.connected) {
         setState((s) => ({ ...s, isConnected: true }));
         subscribe();
       }
 
-      // Cleanup
       return () => {
         socket?.off('connect', onConnect);
         socket?.off('disconnect', onDisconnect);

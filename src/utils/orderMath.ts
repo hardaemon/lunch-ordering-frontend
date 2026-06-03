@@ -24,13 +24,10 @@ export function ordersTotal(order: Order): number {
   return order.items.reduce((sum, i) => sum + itemSubtotal(i), 0);
 }
 
-// Доля доставки участника пропорционально его сумме.
-// Если участник ничего не добавил — доставку не платит.
 export function userDeliveryShare(order: Order, userId: string): number {
   const total = ordersTotal(order);
   if (total <= 0) return 0;
   const delivery = parseMoney(order.deliveryCost);
-  // Бесплатная доставка при достижении порога
   const threshold = parseMoney(order.freeDeliveryThreshold);
   if (threshold > 0 && total >= threshold) return 0;
   const mine = userSubtotal(order, userId);

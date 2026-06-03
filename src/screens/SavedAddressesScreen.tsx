@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-  FlatList,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -84,24 +83,20 @@ export function SavedAddressesScreen() {
             />
           </View>
         ) : (
-          <FlatList
-            data={items}
-            keyExtractor={(i) => i.id}
-            contentContainerStyle={styles.list}
-            renderItem={({ item }) => (
+          <View style={styles.list}>
+            {items.map((item) => (
               <TouchableOpacity
+                key={item.id}
                 style={styles.row}
                 onPress={() => openEdit(item)}
                 onLongPress={() => handleDelete(item)}
                 activeOpacity={0.7}
               >
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.label}>{item.label}</Text>
-                  <Text style={styles.value}>{item.address}</Text>
-                </View>
+                <Text style={styles.label}>{item.label}</Text>
+                <Text style={styles.value}>{item.address}</Text>
               </TouchableOpacity>
-            )}
-          />
+            ))}
+          </View>
         )}
       </View>
 
@@ -144,6 +139,7 @@ export function SavedAddressesScreen() {
             : undefined
         }
       />
+      <Toast />
     </View>
   );
 }
@@ -272,8 +268,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 80,
   },
-  list: { padding: 16, paddingTop: 22, paddingBottom: 120 },
-  row: { backgroundColor: '#fff', padding: 14, borderRadius: 10, marginBottom: 8 },
+  list: {
+    padding: 16,
+    paddingTop: 22,
+    paddingBottom: 120,
+    width: '100%',
+  },
+  row: {
+    backgroundColor: '#fff',
+    padding: 14,
+    borderRadius: 10,
+    marginBottom: 8,
+    width: '100%',
+  },
   label: { fontSize: 16, fontWeight: '600', color: '#000' },
   value: { fontSize: 14, color: '#666', marginTop: 4 },
   fab: {

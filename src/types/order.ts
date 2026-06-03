@@ -31,7 +31,7 @@ export type OrderItem = {
   addedById: string;
   addedBy?: PublicUser;
   name: string;
-  pricePerUnit: string; // decimal приходит строкой
+  pricePerUnit: string;
   quantity: number;
   isOrdered: boolean;
   createdAt: string;
@@ -66,7 +66,6 @@ export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
   [OrderStatus.COMPLAINT]: 'Претензии',
 };
 
-// "Следующий" статус по основному потоку (для кнопки прогресса)
 export const NEXT_STATUS: Partial<Record<OrderStatus, OrderStatus>> = {
   [OrderStatus.COLLECTING]: OrderStatus.CONFIRMING,
   [OrderStatus.CONFIRMING]: OrderStatus.PREPARING,
@@ -75,7 +74,6 @@ export const NEXT_STATUS: Partial<Record<OrderStatus, OrderStatus>> = {
   [OrderStatus.DELIVERED]: OrderStatus.CLOSED,
 };
 
-// Статусы, в которых организатор может отменить заказ
 export const CANCELLABLE_FROM: OrderStatus[] = [
   OrderStatus.COLLECTING,
   OrderStatus.CONFIRMING,
@@ -85,7 +83,6 @@ export const CANCELLABLE_FROM: OrderStatus[] = [
   OrderStatus.COMPLAINT,
 ];
 
-// Статусы, в которых можно открыть претензию
 export const COMPLAINT_FROM: OrderStatus[] = [
   OrderStatus.CONFIRMING,
   OrderStatus.PREPARING,
@@ -93,7 +90,6 @@ export const COMPLAINT_FROM: OrderStatus[] = [
   OrderStatus.DELIVERED,
 ];
 
-// Когда заказ в претензии — на какие статусы можно вернуть
 export const COMPLAINT_RESOLUTIONS: OrderStatus[] = [
   OrderStatus.CONFIRMING,
   OrderStatus.PREPARING,

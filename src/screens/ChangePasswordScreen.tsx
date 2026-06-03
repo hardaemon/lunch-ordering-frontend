@@ -12,8 +12,8 @@ import { PrimaryButton } from '../components/PrimaryButton';
 import { toast } from '../utils/toast';
 import { haptics } from '../utils/haptics';
 import type { AppStackParamList } from '../navigation/RootNavigator';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SheetHeader } from '../components/SheetHeader';
+import Toast from 'react-native-toast-message';
 
 type Props = NativeStackScreenProps<AppStackParamList, 'ChangePassword'>;
 
@@ -22,7 +22,6 @@ export function ChangePasswordScreen({ navigation }: Props) {
   const [next, setNext] = useState('');
   const [confirm, setConfirm] = useState('');
   const [busy, setBusy] = useState(false);
-  const insets = useSafeAreaInsets();
 
   const submit = async () => {
     if (!current || !next || !confirm) {
@@ -115,6 +114,7 @@ export function ChangePasswordScreen({ navigation }: Props) {
           />
         </View>
       </ScrollView>
+      <Toast />
     </View>
   );
 }

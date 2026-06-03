@@ -6,7 +6,6 @@ export const api = axios.create({
   timeout: 10000,
 });
 
-// Перед каждым запросом подкладываем токен, если он есть
 api.interceptors.request.use(async (config) => {
   const token = await tokenStorage.get();
   if (token) {

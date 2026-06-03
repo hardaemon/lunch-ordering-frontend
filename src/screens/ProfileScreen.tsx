@@ -16,6 +16,7 @@ import { toast } from '../utils/toast';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { AppStackParamList } from '../navigation/RootNavigator';
 import { SheetHeader } from '../components/SheetHeader';
+import Toast from 'react-native-toast-message';
 
 type Props = NativeStackScreenProps<AppStackParamList, 'Profile'>;
 
@@ -144,6 +145,7 @@ export function ProfileScreen({ navigation }: Props) {
           <Text style={styles.logoutText}>Выйти</Text>
         </TouchableOpacity>
       </ScrollView>
+      <Toast />
     </View>
   );
 }

@@ -1,4 +1,8 @@
-## Установка
+Веб версия размещена на хостинге и работает: `https://lunch-ordering.vercel.app`
+
+Также вы можете скачать .apk файл и пользоваться приложением на android
+
+## Установка локально
 
 Выполните команды:
 ```
@@ -15,13 +19,12 @@ npm run build:web
 Скачайте данные файлы и загрузите их в папку mobile (с заменой файлов)
 
 Создайте в папке mobile файл `.env` по типу:
-```
-EXPO_PUBLIC_API_URL=http://ВАШ_IP_АДРЕС:3000/api
-```
 
-## Запуск
+`EXPO_PUBLIC_API_URL=http://ВАШ_IP_АДРЕС:3000/api`
 
-В папке mobile выполните команду `npx expo start` (android и ios) или `npx expo start --web` (web)
+## Запуск локально
+
+В папке mobile выполните команду `npx expo start`
 
 ## Сборка .apk
 
@@ -29,5 +32,5 @@ EXPO_PUBLIC_API_URL=http://ВАШ_IP_АДРЕС:3000/api
 npm install -g eas-cli
 eas login
 eas build:configure
-
+eas build --platform android --profile preview
 ```

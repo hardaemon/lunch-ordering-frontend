@@ -2,7 +2,6 @@ import { api } from './client';
 import { SavedAddress, SavedRestaurant } from '../types/saved';
 
 export const savedApi = {
-  // Addresses
   listAddresses: async (): Promise<SavedAddress[]> => {
     const { data } = await api.get<SavedAddress[]>('/saved/addresses');
     return data;
@@ -22,7 +21,6 @@ export const savedApi = {
     await api.delete(`/saved/addresses/${id}`);
   },
 
-  // Restaurants
   listRestaurants: async (): Promise<SavedRestaurant[]> => {
     const { data } = await api.get<SavedRestaurant[]>('/saved/restaurants');
     return data;

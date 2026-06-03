@@ -114,7 +114,6 @@ export function OrderRoomScreen({ route }: Props) {
     const message = `Присоединяйся к заказу из ${order.restaurantName}!\n\n${inviteLink}`;
 
     if (Platform.OS === 'web') {
-      // Сначала пробуем Web Share API (мобильные браузеры)
       if (typeof navigator !== 'undefined' && navigator.share) {
         try {
           await navigator.share({
@@ -123,10 +122,8 @@ export function OrderRoomScreen({ route }: Props) {
           });
           return;
         } catch {
-          // Пользователь отменил диалог — это не ошибка
         }
       }
-      // Fallback — копируем в буфер
       try {
         await navigator.clipboard.writeText(inviteLink);
         toast.success('Ссылка скопирована');
@@ -136,7 +133,6 @@ export function OrderRoomScreen({ route }: Props) {
       return;
     }
 
-    // Native — используем React Native Share
     try {
       await Share.share({
         message,
@@ -310,7 +306,6 @@ export function OrderRoomScreen({ route }: Props) {
               )}
             </View>
 
-            {/* Главная кнопка-действие — переход по флоу */}
             {(showAdvance || showChangeStatus || showShare) && (
               <View style={styles.actionsRow}>
                 {showShare && (
@@ -361,7 +356,6 @@ export function OrderRoomScreen({ route }: Props) {
               </View>
             )}
 
-            {/* Вторичные действия: претензии + отмена */}
             {(showComplaint || showCancel) && (
               <View style={styles.actionsRow}>
                 {showComplaint && (
@@ -489,8 +483,6 @@ export function OrderRoomScreen({ route }: Props) {
   );
 }
 
-// ============== Цвета статусов ==============
-
 const STATUS_BG: Partial<Record<OrderStatus, string>> = {
   [OrderStatus.COLLECTING]: '#007AFF',
   [OrderStatus.CONFIRMING]: '#5AC8FA',
@@ -501,8 +493,6 @@ const STATUS_BG: Partial<Record<OrderStatus, string>> = {
   [OrderStatus.CANCELLED]: '#FF3B30',
   [OrderStatus.COMPLAINT]: '#AF52DE',
 };
-
-// ============== Компоненты-помощники ==============
 
 function ItemRow({
   item,

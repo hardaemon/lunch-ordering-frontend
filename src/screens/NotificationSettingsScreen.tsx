@@ -7,6 +7,7 @@ import { toast } from '../utils/toast';
 import { haptics } from '../utils/haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SheetHeader } from '../components/SheetHeader';
+import Toast from 'react-native-toast-message';
 
 const ITEMS: Array<{
   key: keyof NotificationPreferences;
@@ -108,6 +109,7 @@ export function NotificationSettingsScreen() {
           ))}
         </View>
       </ScrollView>
+      <Toast />
     </View>
   );
 }

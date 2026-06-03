@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { StyleSheet, View, ViewStyle } from 'react-native';
+import { StyleSheet, ViewStyle } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -20,8 +20,8 @@ export function Skeleton({ width = '100%', height = 20, borderRadius = 6, style 
   useEffect(() => {
     opacity.value = withRepeat(
       withTiming(0.8, { duration: 800 }),
-      -1,    // повторять бесконечно
-      true,  // alternate — туда-обратно
+      -1,
+      true,
     );
   }, [opacity]);
 

@@ -7,7 +7,6 @@ import { useNavigation } from '@react-navigation/native';
 import { notificationsApi } from '../api/notifications';
 import { useAuth } from '../auth/AuthContext';
 
-// Поведение, когда уведомление приходит, а приложение открыто
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowBanner: true,
@@ -22,7 +21,6 @@ export function usePushNotifications() {
   const navigation = useNavigation<any>();
   const registeredTokenRef = useRef<string | null>(null);
 
-  // Регистрация токена при логине
   useEffect(() => {
     if (!user) return;
 
@@ -36,12 +34,10 @@ export function usePushNotifications() {
         );
         registeredTokenRef.current = token;
       } catch (e) {
-        // ignore
       }
     })();
   }, [user]);
 
-  // Обработка нажатия на уведомление
   useEffect(() => {
     const responseSub = Notifications.addNotificationResponseReceivedListener(
       (response) => {
@@ -67,7 +63,6 @@ async function registerForPushNotificationsAsync(): Promise<string | null> {
     return null;
   }
 
-  // Android: канал нужно создать заранее
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync('orders', {
       name: 'Заказы',

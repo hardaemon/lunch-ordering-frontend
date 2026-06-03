@@ -8,7 +8,6 @@ type Btn = {
 
 export function confirm(title: string, message: string | undefined, buttons: Btn[]) {
   if (Platform.OS === 'web') {
-    // На web используем нативный confirm. Считаем "OK" как нажатие первой не-cancel кнопки.
     const confirmBtn = buttons.find((b) => b.style !== 'cancel');
     const text = message ? `${title}\n\n${message}` : title;
     if (window.confirm(text)) {

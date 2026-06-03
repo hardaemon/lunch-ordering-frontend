@@ -118,7 +118,6 @@ export function OrdersListScreen({ navigation }: Props) {
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-      {/* Зафиксированная верхняя панель */}
       <View style={styles.topBar}>
         <Text style={styles.greeting}>Привет, {user?.name}</Text>
         <TouchableOpacity
@@ -129,7 +128,6 @@ export function OrdersListScreen({ navigation }: Props) {
         </TouchableOpacity>
       </View>
 
-      {/* Табы — тоже фиксированы */}
       <View style={styles.tabs}>
         <TouchableOpacity
           style={[styles.tab, tab === 'active' && styles.tabActive]}
@@ -153,7 +151,6 @@ export function OrdersListScreen({ navigation }: Props) {
         </TouchableOpacity>
       </View>
 
-      {/* Контент */}
       {isLoading ? (
         <OrderListSkeleton />
       ) : (

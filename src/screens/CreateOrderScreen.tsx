@@ -139,7 +139,7 @@ export function CreateOrderScreen({ navigation }: Props) {
 
         {savedRestaurants.length > 0 && (
           <View style={styles.chipsBlock}>
-            <Text style={styles.chipsLabel}>Из сохранённых:</Text>
+            <Text style={styles.chipsLabel}>Сохранённые:</Text>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
@@ -186,7 +186,7 @@ export function CreateOrderScreen({ navigation }: Props) {
 
         {savedAddresses.length > 0 && (
           <View style={styles.chipsBlock}>
-            <Text style={styles.chipsLabel}>Из сохранённых:</Text>
+            <Text style={styles.chipsLabel}>Сохранённые:</Text>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
