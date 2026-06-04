@@ -8,6 +8,7 @@ import { haptics } from '../utils/haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SheetHeader } from '../components/SheetHeader';
 import Toast from 'react-native-toast-message';
+import { useResponsiveLayout } from '../hooks/useResponsiveLayout';
 
 const ITEMS: Array<{
   key: keyof NotificationPreferences;
@@ -48,7 +49,7 @@ export function NotificationSettingsScreen() {
   const initial = user?.notificationPreferences ?? DEFAULTS;
   const [prefs, setPrefs] = useState<NotificationPreferences>(initial);
   const [busyKey, setBusyKey] = useState<keyof NotificationPreferences | null>(null);
-  const insets = useSafeAreaInsets();
+  const { contentMaxWidth } = useResponsiveLayout();
 
   const toggle = async (key: keyof NotificationPreferences) => {
     const newValue = !prefs[key];
@@ -87,26 +88,28 @@ export function NotificationSettingsScreen() {
         style={styles.scrollAbsolute}
         contentContainerStyle={styles.content}
       >
-        <Text style={styles.hint}>
-          Управляйте тем, какие push-уведомления хотите получать.
-        </Text>
-        <View style={styles.card}>
-          {ITEMS.map((item, idx) => (
-            <View
-              key={item.key}
-              style={[styles.row, idx < ITEMS.length - 1 && styles.rowDivider]}
-            >
-              <View style={{ flex: 1, marginRight: 12 }}>
-                <Text style={styles.title}>{item.title}</Text>
-                <Text style={styles.description}>{item.description}</Text>
+        <View style={{ maxWidth: contentMaxWidth, width: '100%', alignSelf: 'center' }}>
+          <Text style={styles.hint}>
+            Управляйте тем, какие push-уведомления хотите получать.
+          </Text>
+          <View style={styles.card}>
+            {ITEMS.map((item, idx) => (
+              <View
+                key={item.key}
+                style={[styles.row, idx < ITEMS.length - 1 && styles.rowDivider]}
+              >
+                <View style={{ flex: 1, marginRight: 12 }}>
+                  <Text style={styles.title}>{item.title}</Text>
+                  <Text style={styles.description}>{item.description}</Text>
+                </View>
+                <Switch
+                  value={prefs[item.key]}
+                  onValueChange={() => toggle(item.key)}
+                  disabled={busyKey === item.key}
+                />
               </View>
-              <Switch
-                value={prefs[item.key]}
-                onValueChange={() => toggle(item.key)}
-                disabled={busyKey === item.key}
-              />
-            </View>
-          ))}
+            ))}
+          </View>
         </View>
       </ScrollView>
       <Toast />

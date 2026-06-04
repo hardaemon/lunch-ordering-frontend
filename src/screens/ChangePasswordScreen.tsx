@@ -14,6 +14,7 @@ import { haptics } from '../utils/haptics';
 import type { AppStackParamList } from '../navigation/RootNavigator';
 import { SheetHeader } from '../components/SheetHeader';
 import Toast from 'react-native-toast-message';
+import { useResponsiveLayout } from '../hooks/useResponsiveLayout';
 
 type Props = NativeStackScreenProps<AppStackParamList, 'ChangePassword'>;
 
@@ -22,6 +23,7 @@ export function ChangePasswordScreen({ navigation }: Props) {
   const [next, setNext] = useState('');
   const [confirm, setConfirm] = useState('');
   const [busy, setBusy] = useState(false);
+  const { contentMaxWidth } = useResponsiveLayout();
 
   const submit = async () => {
     if (!current || !next || !confirm) {
@@ -68,50 +70,52 @@ export function ChangePasswordScreen({ navigation }: Props) {
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
       >
-        <View style={styles.card}>
-          <Text style={styles.label}>Текущий пароль</Text>
-          <TextInput
-            style={styles.input}
-            secureTextEntry
-            autoCapitalize="none"
-            autoCorrect={false}
-            value={current}
-            onChangeText={setCurrent}
-            editable={!busy}
-            placeholderTextColor="#999"
-          />
+        <View style={{ maxWidth: contentMaxWidth, width: '100%', alignSelf: 'center' }}>
+          <View style={styles.card}>
+            <Text style={styles.label}>Текущий пароль</Text>
+            <TextInput
+              style={styles.input}
+              secureTextEntry
+              autoCapitalize="none"
+              autoCorrect={false}
+              value={current}
+              onChangeText={setCurrent}
+              editable={!busy}
+              placeholderTextColor="#999"
+            />
 
-          <Text style={[styles.label, { marginTop: 16 }]}>Новый пароль</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Минимум 8 символов"
-            placeholderTextColor="#999"
-            secureTextEntry
-            autoCapitalize="none"
-            autoCorrect={false}
-            value={next}
-            onChangeText={setNext}
-            editable={!busy}
-          />
+            <Text style={[styles.label, { marginTop: 16 }]}>Новый пароль</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Минимум 8 символов"
+              placeholderTextColor="#999"
+              secureTextEntry
+              autoCapitalize="none"
+              autoCorrect={false}
+              value={next}
+              onChangeText={setNext}
+              editable={!busy}
+            />
 
-          <Text style={[styles.label, { marginTop: 16 }]}>Подтвердите новый</Text>
-          <TextInput
-            style={styles.input}
-            secureTextEntry
-            autoCapitalize="none"
-            autoCorrect={false}
-            value={confirm}
-            onChangeText={setConfirm}
-            editable={!busy}
-            placeholderTextColor="#999"
-          />
+            <Text style={[styles.label, { marginTop: 16 }]}>Подтвердите новый</Text>
+            <TextInput
+              style={styles.input}
+              secureTextEntry
+              autoCapitalize="none"
+              autoCorrect={false}
+              value={confirm}
+              onChangeText={setConfirm}
+              editable={!busy}
+              placeholderTextColor="#999"
+            />
 
-          <PrimaryButton
-            title="Сменить пароль"
-            onPress={submit}
-            busy={busy}
-            style={{ marginTop: 20 }}
-          />
+            <PrimaryButton
+              title="Сменить пароль"
+              onPress={submit}
+              busy={busy}
+              style={{ marginTop: 20 }}
+            />
+          </View>
         </View>
       </ScrollView>
       <Toast />

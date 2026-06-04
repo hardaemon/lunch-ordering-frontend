@@ -15,6 +15,7 @@ import { useAuth } from '../auth/AuthContext';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { toast } from '../utils/toast';
 import type { AuthStackParamList } from '../navigation/RootNavigator';
+import { useResponsiveLayout } from '../hooks/useResponsiveLayout';
 
 const InteractiveWrap = ({ children, style }: any) => {
   if (Platform.OS === 'web') {
@@ -30,6 +31,7 @@ export function LoginScreen({ navigation }: Props) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
+  const { contentMaxWidth } = useResponsiveLayout();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -54,41 +56,43 @@ export function LoginScreen({ navigation }: Props) {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <InteractiveWrap style={styles.inner}>
-        <Text style={styles.title}>Вход</Text>
+        <View style={{ maxWidth: contentMaxWidth, width: '100%', alignSelf: 'center' }}>
+          <Text style={styles.title}>Вход</Text>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          placeholderTextColor="#999"
-          autoCapitalize="none"
-          autoCorrect={false}
-          keyboardType="email-address"
-          value={email}
-          onChangeText={setEmail}
-          editable={!busy}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Пароль"
-          placeholderTextColor="#999"
-          secureTextEntry
-          autoCapitalize="none"
-          autoCorrect={false}
-          value={password}
-          onChangeText={setPassword}
-          editable={!busy}
-        />
+          <TextInput
+            style={styles.input}
+            placeholder="Email"
+            placeholderTextColor="#999"
+            autoCapitalize="none"
+            autoCorrect={false}
+            keyboardType="email-address"
+            value={email}
+            onChangeText={setEmail}
+            editable={!busy}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Пароль"
+            placeholderTextColor="#999"
+            secureTextEntry
+            autoCapitalize="none"
+            autoCorrect={false}
+            value={password}
+            onChangeText={setPassword}
+            editable={!busy}
+          />
 
-        <PrimaryButton
-          title="Войти"
-          onPress={handleLogin}
-          busy={busy}
-          style={{ marginTop: 8 }}
-        />
+          <PrimaryButton
+            title="Войти"
+            onPress={handleLogin}
+            busy={busy}
+            style={{ marginTop: 8 }}
+          />
 
-        <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-          <Text style={styles.link}>Нет аккаунта? Зарегистрироваться</Text>
-        </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+            <Text style={styles.link}>Нет аккаунта? Зарегистрироваться</Text>
+          </TouchableOpacity>
+        </View>
       </InteractiveWrap>
     </KeyboardAvoidingView>
   );

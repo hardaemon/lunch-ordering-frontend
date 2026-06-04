@@ -17,6 +17,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { AppStackParamList } from '../navigation/RootNavigator';
 import { SheetHeader } from '../components/SheetHeader';
 import Toast from 'react-native-toast-message';
+import { useResponsiveLayout } from '../hooks/useResponsiveLayout';
 
 type Props = NativeStackScreenProps<AppStackParamList, 'Profile'>;
 
@@ -26,6 +27,7 @@ export function ProfileScreen({ navigation }: Props) {
   const [email, setEmail] = useState(user?.email ?? '');
   const [busy, setBusy] = useState(false);
   const insets = useSafeAreaInsets();
+  const { contentMaxWidth } = useResponsiveLayout();
 
   const save = async () => {
     if (!name.trim()) {
@@ -71,79 +73,81 @@ export function ProfileScreen({ navigation }: Props) {
         keyboardDismissMode="on-drag"
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.card}>
-          <Text style={styles.label}>Имя</Text>
-          <TextInput
-            style={styles.input}
-            placeholderTextColor="#999"
-            value={name}
-            onChangeText={setName}
-            editable={!busy}
-          />
-          <Text style={[styles.label, { marginTop: 16 }]}>Email</Text>
-          <TextInput
-            style={styles.input}
-            placeholderTextColor="#999"
-            autoCapitalize="none"
-            autoCorrect={false}
-            keyboardType="email-address"
-            value={email}
-            onChangeText={setEmail}
-            editable={!busy}
-          />
-          <PrimaryButton
-            title="Сохранить"
-            onPress={save}
-            busy={busy}
-            style={{ marginTop: 20 }}
-          />
-        </View>
+        <View style={{ maxWidth: contentMaxWidth, width: '100%', alignSelf: 'center' }}>
+          <View style={styles.card}>
+            <Text style={styles.label}>Имя</Text>
+            <TextInput
+              style={styles.input}
+              placeholderTextColor="#999"
+              value={name}
+              onChangeText={setName}
+              editable={!busy}
+            />
+            <Text style={[styles.label, { marginTop: 16 }]}>Email</Text>
+            <TextInput
+              style={styles.input}
+              placeholderTextColor="#999"
+              autoCapitalize="none"
+              autoCorrect={false}
+              keyboardType="email-address"
+              value={email}
+              onChangeText={setEmail}
+              editable={!busy}
+            />
+            <PrimaryButton
+              title="Сохранить"
+              onPress={save}
+              busy={busy}
+              style={{ marginTop: 20 }}
+            />
+          </View>
 
-        <TouchableOpacity
-          style={styles.row}
-          onPress={() => navigation.navigate('SavedAddresses')}
-          activeOpacity={0.6}
-        >
-          <Text style={styles.rowText}>Сохранённые адреса</Text>
-          <Text style={styles.rowArrow}>›</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.row}
-          onPress={() => navigation.navigate('SavedRestaurants')}
-          activeOpacity={0.6}
-        >
-          <Text style={styles.rowText}>Сохранённые рестораны</Text>
-          <Text style={styles.rowArrow}>›</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.row}
-          onPress={() => navigation.navigate('ChangePassword')}
-          activeOpacity={0.6}
-        >
-          <Text style={styles.rowText}>Сменить пароль</Text>
-          <Text style={styles.rowArrow}>›</Text>
-        </TouchableOpacity>
-
-        {Platform.OS !== 'web' && (
           <TouchableOpacity
             style={styles.row}
-            onPress={() => navigation.navigate('NotificationSettings')}
+            onPress={() => navigation.navigate('SavedAddresses')}
             activeOpacity={0.6}
           >
-            <Text style={styles.rowText}>Уведомления</Text>
+            <Text style={styles.rowText}>Сохранённые адреса</Text>
             <Text style={styles.rowArrow}>›</Text>
           </TouchableOpacity>
-        )}
 
-        <TouchableOpacity
-          style={[styles.row, styles.logoutRow]}
-          onPress={logout}
-          activeOpacity={0.6}
-        >
-          <Text style={styles.logoutText}>Выйти</Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.row}
+            onPress={() => navigation.navigate('SavedRestaurants')}
+            activeOpacity={0.6}
+          >
+            <Text style={styles.rowText}>Сохранённые рестораны</Text>
+            <Text style={styles.rowArrow}>›</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.row}
+            onPress={() => navigation.navigate('ChangePassword')}
+            activeOpacity={0.6}
+          >
+            <Text style={styles.rowText}>Сменить пароль</Text>
+            <Text style={styles.rowArrow}>›</Text>
+          </TouchableOpacity>
+
+          {Platform.OS !== 'web' && (
+            <TouchableOpacity
+              style={styles.row}
+              onPress={() => navigation.navigate('NotificationSettings')}
+              activeOpacity={0.6}
+            >
+              <Text style={styles.rowText}>Уведомления</Text>
+              <Text style={styles.rowArrow}>›</Text>
+            </TouchableOpacity>
+          )}
+
+          <TouchableOpacity
+            style={[styles.row, styles.logoutRow]}
+            onPress={logout}
+            activeOpacity={0.6}
+          >
+            <Text style={styles.logoutText}>Выйти</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
       <Toast />
     </View>

@@ -22,6 +22,7 @@ import { SheetHeader } from '../components/SheetHeader';
 import Toast from 'react-native-toast-message';
 import { ModalContent } from '../components/ModalContent';
 import { confirm } from '../utils/confirm';
+import { useResponsiveLayout } from '../hooks/useResponsiveLayout';
 
 const addressApi = {
   list: savedApi.listAddresses,
@@ -35,6 +36,7 @@ export function SavedAddressesScreen() {
   const [editing, setEditing] = useState<SavedAddress | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const insets = useSafeAreaInsets();
+  const { contentMaxWidth, isWide } = useResponsiveLayout();
 
   const openCreate = () => {
     setEditing(null);
@@ -83,7 +85,7 @@ export function SavedAddressesScreen() {
             />
           </View>
         ) : (
-          <View style={styles.list}>
+          <View style={[styles.list, { maxWidth: contentMaxWidth, alignSelf: 'center' }]}>
             {items.map((item) => (
               <TouchableOpacity
                 key={item.id}
@@ -101,7 +103,13 @@ export function SavedAddressesScreen() {
       </View>
 
       <TouchableOpacity
-        style={[styles.fab, { bottom: insets.bottom + 20 }]}
+        style={[
+          styles.fab,
+          {
+            bottom: insets.bottom + 20,
+            right: isWide ? (`calc(50% - ${contentMaxWidth! / 2}px + 20px)` as any) : 20,
+          },
+        ]}
         onPress={() => {
           haptics.light();
           openCreate();
@@ -285,7 +293,6 @@ const styles = StyleSheet.create({
   value: { fontSize: 14, color: '#666', marginTop: 4 },
   fab: {
     position: 'absolute',
-    right: 20,
     width: 60,
     height: 60,
     borderRadius: 30,
@@ -300,13 +307,21 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
   },
   fabText: { color: '#fff', fontSize: 32, lineHeight: 36, marginTop: -2 },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
+  modalOverlay: {
+    flex: 1,
+    width: '100%',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
   modalBackdrop: { ...StyleSheet.absoluteFillObject },
   modal: {
     backgroundColor: '#fff',
     padding: 20,
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
+    width: '100%',
+    maxWidth: 600,
+    alignSelf: 'center',
   },
   modalTitle: { fontSize: 20, fontWeight: '700', marginBottom: 16, color: '#000' },
   input: {

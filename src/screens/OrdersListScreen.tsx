@@ -20,6 +20,7 @@ import { toast } from '../utils/toast';
 import { haptics } from '../utils/haptics';
 import type { AppStackParamList } from '../navigation/RootNavigator';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useResponsiveLayout } from '../hooks/useResponsiveLayout';
 
 type Props = NativeStackScreenProps<AppStackParamList, 'OrdersList'>;
 
@@ -41,6 +42,7 @@ export function OrdersListScreen({ navigation }: Props) {
   const [refreshing, setRefreshing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [tab, setTab] = useState<'active' | 'history'>('active');
+  const { contentMaxWidth, horizontalPadding, isWide } = useResponsiveLayout();
 
   const load = useCallback(async () => {
     try {
@@ -118,74 +120,74 @@ export function OrdersListScreen({ navigation }: Props) {
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-      <View style={styles.topBar}>
-        <Text style={styles.greeting}>Привет, {user?.name}</Text>
-        <TouchableOpacity
-          onPress={() => navigation.navigate('Profile')}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-        >
-          <Ionicons name="person-circle-outline" size={36} color="#007AFF" />
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.tabs}>
-        <TouchableOpacity
-          style={[styles.tab, tab === 'active' && styles.tabActive]}
-          onPress={() => setTab('active')}
-        >
-          <Text
-            style={[styles.tabText, tab === 'active' && styles.tabTextActive]}
+      <View style={[styles.responsiveWrap, { maxWidth: contentMaxWidth, width: '100%', alignSelf: 'center' }]}>
+        <View style={styles.topBar}>
+          <Text style={styles.greeting}>Привет, {user?.name}</Text>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('Profile')}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            Активные
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tab, tab === 'history' && styles.tabActive]}
-          onPress={() => setTab('history')}
-        >
-          <Text
-            style={[styles.tabText, tab === 'history' && styles.tabTextActive]}
-          >
-            История
-          </Text>
-        </TouchableOpacity>
-      </View>
+            <Ionicons name="person-circle-outline" size={36} color="#007AFF" />
+          </TouchableOpacity>
+        </View>
 
-      {isLoading ? (
-        <OrderListSkeleton />
-      ) : (
-        <FlatList
-          data={filtered}
-          keyExtractor={(item) => item.id}
-          renderItem={renderItem}
-          contentContainerStyle={styles.list}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-          }
-          ListEmptyComponent={
-            <EmptyState
-              icon="🛒"
-              title={
-                tab === 'active' ? 'Активных заказов нет' : 'История пуста'
-              }
-              subtitle={
-                tab === 'active'
-                  ? 'Создайте новый или присоединитесь по ссылке'
-                  : 'Завершённые заказы появятся здесь'
-              }
-              ctaTitle={tab === 'active' ? 'Создать заказ' : undefined}
-              onCtaPress={
-                tab === 'active'
-                  ? () => navigation.navigate('CreateOrder')
-                  : undefined
-              }
-            />
-          }
-        />
-      )}
+        <View style={styles.tabs}>
+          <TouchableOpacity
+            style={[styles.tab, tab === 'active' && styles.tabActive]}
+            onPress={() => setTab('active')}
+          >
+            <Text style={[styles.tabText, tab === 'active' && styles.tabTextActive]}>
+              Активные
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.tab, tab === 'history' && styles.tabActive]}
+            onPress={() => setTab('history')}
+          >
+            <Text style={[styles.tabText, tab === 'history' && styles.tabTextActive]}>
+              История
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {isLoading ? (
+          <OrderListSkeleton />
+        ) : (
+          <FlatList
+            data={filtered}
+            keyExtractor={(item) => item.id}
+            renderItem={renderItem}
+            contentContainerStyle={styles.list}
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+            ListEmptyComponent={
+              <EmptyState
+                icon="🛒"
+                title={tab === 'active' ? 'Активных заказов нет' : 'История пуста'}
+                subtitle={
+                  tab === 'active'
+                    ? 'Создайте новый или присоединитесь по ссылке'
+                    : 'Завершённые заказы появятся здесь'
+                }
+                ctaTitle={tab === 'active' ? 'Создать заказ' : undefined}
+                onCtaPress={
+                  tab === 'active'
+                    ? () => navigation.navigate('CreateOrder')
+                    : undefined
+                }
+              />
+            }
+          />
+        )}
+      </View>
 
       <TouchableOpacity
-        style={[styles.fab, { bottom: insets.bottom + 20 }]}
+        style={[
+          styles.fab,
+          {
+            bottom: insets.bottom + 20,
+            right: isWide ? `calc(50% - ${contentMaxWidth! / 2}px + 20px)` as any : 20,
+          },
+        ]}
         onPress={() => {
           haptics.light();
           navigation.navigate('CreateOrder');
@@ -256,4 +258,5 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   fabText: { color: '#fff', fontSize: 32, lineHeight: 36, marginTop: -2 },
+  responsiveWrap: { flex: 1 },
 });

@@ -21,8 +21,14 @@ import { haptics } from '../utils/haptics';
 import type { AppStackParamList } from '../navigation/RootNavigator';
 import { formatDateTime } from '../utils/formatters';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useResponsiveLayout } from '../hooks/useResponsiveLayout';
 
 type Props = NativeStackScreenProps<AppStackParamList, 'CreateOrder'>;
+
+function toDatetimeLocalString(d: Date): string {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
 
 export function CreateOrderScreen({ navigation }: Props) {
   const [restaurantName, setRestaurantName] = useState('');
@@ -40,6 +46,7 @@ export function CreateOrderScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
   const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
   const [savedRestaurants, setSavedRestaurants] = useState<SavedRestaurant[]>([]);
+  const { contentMaxWidth, horizontalPadding } = useResponsiveLayout();
 
   useEffect(() => {
     savedApi.listAddresses().then(setSavedAddresses).catch(() => {});
@@ -122,11 +129,15 @@ export function CreateOrderScreen({ navigation }: Props) {
   return (
     <ScrollView
       style={styles.container}
-      contentContainerStyle={{ paddingBottom: insets.bottom + 40 }}
+      contentContainerStyle={{
+        paddingBottom: insets.bottom + 40,
+        paddingHorizontal: horizontalPadding,
+        alignItems: 'center',
+      }}
       keyboardShouldPersistTaps="handled"
       keyboardDismissMode="on-drag"
     >
-      <View style={styles.form}>
+      <View style={[styles.form, { maxWidth: contentMaxWidth, width: '100%' }]}>
         <Text style={styles.label}>Ресторан *</Text>
         <TextInput
           style={styles.input}
@@ -228,13 +239,40 @@ export function CreateOrderScreen({ navigation }: Props) {
         />
 
         <Text style={styles.label}>Дедлайн сбора позиций</Text>
-        <TouchableOpacity
-          style={styles.input}
-          onPress={openDeadlinePicker}
-          disabled={busy}
-        >
-          <Text style={{ color: '#000' }}>{formatDateTime(deadline)}</Text>
-        </TouchableOpacity>
+        {Platform.OS === 'web' ? (
+          <input
+            type="datetime-local"
+            value={toDatetimeLocalString(deadline)}
+            onChange={(e) => {
+              const v = (e.target as HTMLInputElement).value;
+              if (!v) return;
+              const d = new Date(v);
+              d.setSeconds(0, 0);
+              setDeadline(d);
+            }}
+            min={toDatetimeLocalString(new Date())}
+            style={{
+              borderWidth: 1,
+              borderStyle: 'solid',
+              borderColor: '#ddd',
+              borderRadius: 8,
+              padding: 14,
+              fontSize: 16,
+              backgroundColor: '#fff',
+              fontFamily: 'inherit',
+              width: '100%',
+              boxSizing: 'border-box',
+            } as any}
+          />
+        ) : (
+          <TouchableOpacity
+            style={styles.input}
+            onPress={openDeadlinePicker}
+            disabled={busy}
+          >
+            <Text style={{ color: '#000' }}>{formatDateTime(deadline)}</Text>
+          </TouchableOpacity>
+        )}
 
         {showIosPicker && Platform.OS === 'ios' && (
           <DateTimePicker
@@ -265,7 +303,7 @@ export function CreateOrderScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
-  form: { padding: 16 },
+  form: { paddingVertical: 16 },
   label: { fontSize: 14, fontWeight: '500', marginTop: 12, marginBottom: 6, color: '#000' },
   input: {
     borderWidth: 1,
