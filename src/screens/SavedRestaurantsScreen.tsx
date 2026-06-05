@@ -4,6 +4,7 @@ import {
   Modal,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -23,6 +24,7 @@ import Toast from 'react-native-toast-message';
 import { ModalContent } from '../components/ModalContent';
 import { confirm } from '../utils/confirm';
 import { useResponsiveLayout } from '../hooks/useResponsiveLayout';
+import { Ionicons } from '@expo/vector-icons';
 
 const restaurantApi = {
   list: savedApi.listRestaurants,
@@ -74,8 +76,10 @@ export function SavedRestaurantsScreen() {
         <SheetHeader title="Сохранённые рестораны" />
       </View>
 
-      <View style={styles.contentArea}>
-        {isLoading ? null : isEmpty ? (
+      {isLoading ? (
+        <View style={styles.contentArea} />
+      ) : isEmpty ? (
+        <View style={styles.contentArea}>
           <View style={styles.emptyWrap}>
             <EmptyState
               icon="🍽️"
@@ -85,7 +89,38 @@ export function SavedRestaurantsScreen() {
               onCtaPress={openCreate}
             />
           </View>
-        ) : (
+        </View>
+      ) : Platform.OS === 'web' ? (
+        <ScrollView
+          style={styles.contentArea}
+          contentContainerStyle={{
+            maxWidth: contentMaxWidth,
+            width: '100%',
+            alignSelf: 'center',
+            padding: 16,
+            paddingTop: 22,
+            paddingBottom: 120,
+          }}
+        >
+          {items.map((item) => (
+            <TouchableOpacity
+              key={item.id}
+              style={styles.row}
+              onPress={() => openEdit(item)}
+              onLongPress={() => handleDelete(item)}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.name}>{item.name}</Text>
+              {item.url && (
+                <Text style={styles.url} numberOfLines={1}>
+                  {item.url}
+                </Text>
+              )}
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      ) : (
+        <View style={styles.contentArea}>
           <View style={[styles.list, { maxWidth: contentMaxWidth, alignSelf: 'center' }]}>
             {items.map((item) => (
               <TouchableOpacity
@@ -104,8 +139,8 @@ export function SavedRestaurantsScreen() {
               </TouchableOpacity>
             ))}
           </View>
-        )}
-      </View>
+        </View>
+      )}
 
       <TouchableOpacity
         style={[
@@ -121,7 +156,7 @@ export function SavedRestaurantsScreen() {
         }}
         activeOpacity={0.8}
       >
-        <Text style={styles.fabText}>+</Text>
+        <Ionicons name="add" size={32} color="#fff" />
       </TouchableOpacity>
 
       <EditRestaurantModal
@@ -314,7 +349,6 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 4 },
   },
-  fabText: { color: '#fff', fontSize: 32, lineHeight: 36, marginTop: -2 },
   modalOverlay: {
     flex: 1,
     width: '100%',

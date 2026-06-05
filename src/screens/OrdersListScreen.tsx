@@ -1,6 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import {
   FlatList,
+  Platform,
   RefreshControl,
   StyleSheet,
   Text,
@@ -194,7 +195,7 @@ export function OrdersListScreen({ navigation }: Props) {
         }}
         activeOpacity={0.8}
       >
-        <Text style={styles.fabText}>+</Text>
+        <Ionicons name="add" size={32} color="#fff" />
       </TouchableOpacity>
     </SafeAreaView>
   );
@@ -257,6 +258,13 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     elevation: 6,
   },
-  fabText: { color: '#fff', fontSize: 32, lineHeight: 36, marginTop: -2 },
+  fabText: {
+    color: '#fff',
+    fontSize: 32,
+    lineHeight: Platform.OS === 'web' ? 32 : 36,
+    marginTop: Platform.OS === 'web' ? 0 : -2,
+    textAlign: 'center',
+    textAlignVertical: 'center',
+  },
   responsiveWrap: { flex: 1 },
 });

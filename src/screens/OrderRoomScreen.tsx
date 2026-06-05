@@ -26,6 +26,7 @@ import {
   CANCELLABLE_FROM,
   COMPLAINT_FROM,
   COMPLAINT_RESOLUTIONS,
+  Order,
 } from '../types/order';
 import {
   formatMoney,
@@ -47,6 +48,7 @@ import { formatDateTime } from '../utils/formatters';
 import { ModalContent } from '../components/ModalContent';
 import { confirm } from '../utils/confirm';
 import { useResponsiveLayout } from '../hooks/useResponsiveLayout';
+import { Ionicons } from '@expo/vector-icons';
 
 type Props = NativeStackScreenProps<AppStackParamList, 'OrderRoom'>;
 
@@ -412,7 +414,12 @@ export function OrderRoomScreen({ route }: Props) {
               )}
             </View>
 
-            {!isOwner && isParticipant && me && !me.hasPaid && mySubtotal > 0 && (
+            {!isOwner &&
+              isParticipant &&
+              me &&
+              !me.hasPaid &&
+              mySubtotal > 0 &&
+              order.status !== OrderStatus.COLLECTING && (
               <PrimaryButton
                 title="Я перевёл деньги"
                 onPress={handleMarkPaid}
@@ -475,7 +482,7 @@ export function OrderRoomScreen({ route }: Props) {
           }}
           activeOpacity={0.8}
         >
-          <Text style={styles.fabText}>+</Text>
+          <Ionicons name="add" size={32} color="#fff" />
         </TouchableOpacity>
       )}
 
@@ -591,7 +598,7 @@ function ParticipantsBlock({
   currentUserId,
   onConfirmPayment,
 }: {
-  order: any;
+  order: Order;
   currentUserId: string;
   onConfirmPayment: (userId: string) => void;
 }) {
@@ -617,7 +624,7 @@ function ParticipantsBlock({
               </Text>
             </View>
             <View style={{ alignItems: 'flex-end' }}>
-              {p.hasPaid ? (
+              {p.userId === order.ownerId ? null : p.hasPaid ? (
                 p.paymentConfirmedAt ? (
                   <Text style={styles.confirmedText}>✓ подтверждено</Text>
                 ) : (
@@ -935,7 +942,6 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 4 },
   },
-  fabText: { color: '#fff', fontSize: 32, lineHeight: 36, marginTop: -2 },
   modalOverlay: {
     flex: 1,
     width: '100%',
